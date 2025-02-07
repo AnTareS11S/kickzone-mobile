@@ -1,7 +1,8 @@
-import { View, Text, Image } from 'react-native';
 import React from 'react';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Tabs } from 'expo-router';
-import { icons } from '../../constants';
+import { icons, images } from '../../constants';
+import { Feather } from '@expo/vector-icons';
 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
@@ -13,7 +14,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
         className='w-5 h-5'
       />
       <Text
-        className={`${focused ? 'font-psemibold' : 'font-pregular'} text-[5px]`}
+        className={`${focused ? 'font-psemibold' : 'font-pregular'} text-[7px]`}
         style={{ color: color }}
       >
         {name}
@@ -22,9 +23,27 @@ const TabIcon = ({ icon, color, name, focused }) => {
   );
 };
 
-const TabsLayout = () => {
+const Header = ({ onMenuPress }) => {
   return (
-    <>
+    <View className='bg-white flex-row items-center justify-between px-4 py-5 mt-5 border-b border-gray-200'>
+      <Image source={images.logo} resizeMode='contain' className='w-32 h-8' />
+      <TouchableOpacity onPress={onMenuPress} className='p-2'>
+        <Feather name='menu' size={24} color='#333' />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const TabsLayout = () => {
+  const handleMenuPress = () => {
+    // Implement your menu open logic here
+    // This could be navigation to a sidebar, opening a modal, etc.
+    console.log('Menu pressed');
+  };
+
+  return (
+    <View className='flex-1'>
+      <Header onMenuPress={handleMenuPress} />
       <Tabs
         screenOptions={{
           tabBarShowLabel: false,
@@ -35,7 +54,7 @@ const TabsLayout = () => {
               backgroundColor: '#fff',
               borderTopWidth: 1,
               borderTopColor: '#E2E8F0',
-              height: 45,
+              height: 55,
               shadowColor: '#000',
               shadowOffset: {
                 width: 0,
@@ -52,7 +71,6 @@ const TabsLayout = () => {
         <Tabs.Screen
           name='home'
           options={{
-            title: 'Home',
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
@@ -67,13 +85,12 @@ const TabsLayout = () => {
         <Tabs.Screen
           name='bookmark'
           options={{
-            title: 'Bookmark',
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 icon={icons.bookmark}
                 color={color}
-                name='Bookmark'
+                name='Search'
                 focused={focused}
               />
             ),
@@ -82,7 +99,6 @@ const TabsLayout = () => {
         <Tabs.Screen
           name='create'
           options={{
-            title: 'Create',
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
@@ -97,20 +113,19 @@ const TabsLayout = () => {
         <Tabs.Screen
           name='profile'
           options={{
-            title: 'Profile',
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 icon={icons.profile}
                 color={color}
-                name='Profile'
+                name='Leagues'
                 focused={focused}
               />
             ),
           }}
         />
       </Tabs>
-    </>
+    </View>
   );
 };
 
