@@ -1,10 +1,42 @@
-import React from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  BackHandler,
+  Alert,
+} from 'react-native';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import useFetch from '../../hooks/useFetch';
+import { useFocusEffect } from 'expo-router';
 
 const Home = () => {
   const { data: posts, isLoading, error, refetch } = useFetch('api/post/all');
+
+  const handleBackPress = () => {
+    Alert.alert('Exit App', 'Are you sure you want to exit?', [
+      {
+        text: 'Cancel',
+        onPress: () => null,
+        style: 'cancel',
+      },
+      { text: 'YES', onPress: () => BackHandler.exitApp() },
+    ]);
+
+    return true;
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      };
+    })
+  );
 
   const renderPost = ({ item }) => (
     <TouchableOpacity
