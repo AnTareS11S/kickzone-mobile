@@ -10,12 +10,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useRouter } from 'expo-router';
 import * as Yup from 'yup';
-
-// Assuming you have similar assets and components
 import { images } from '../../constants';
 import FormField from '../../components/FormField';
-import OAuth from '../../components/OAuth'; // Optional, depends on your OAuth setup
+import OAuth from '../../components/OAuth';
 import CustomButton from '../../components/CustomButton';
+import api from '../../lib/api';
 
 const SignUpSchema = Yup.object().shape({
   username: Yup.string()
@@ -69,12 +68,11 @@ const SignUp = () => {
     setIsSubmitting(true);
     try {
       // Check username availability
-      const usernameCheck = await fetch(
-        `/api/auth/check-username?username=${form.username}`
-      );
-      const usernameData = await usernameCheck.json();
+      const usernameCheck = await api.get(`/api/auth/check-username`, {
+        params: { username: form.username },
+      });
 
-      if (usernameData.exists) {
+      if (usernameCheck.data.exists) {
         setErrors((prev) => ({
           ...prev,
           username: 'Username already exists',
@@ -84,12 +82,11 @@ const SignUp = () => {
       }
 
       // Check email availability
-      const emailCheck = await fetch(
-        `/api/auth/check-email?email=${form.email}`
-      );
-      const emailData = await emailCheck.json();
+      const emailCheck = await api.get(`/api/auth/check-email`, {
+        params: { email: form.email },
+      });
 
-      if (emailData.exists) {
+      if (emailCheck.data.exists) {
         setErrors((prev) => ({
           ...prev,
           email: 'Email already exists',
@@ -99,15 +96,9 @@ const SignUp = () => {
       }
 
       // Signup request
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      });
+      const response = await api.post('/api/auth/signup', form);
 
-      if (response.ok) {
+      if (response.status === 201) {
         // Navigate to sign-in or home screen
         router.replace('/sign-in');
       } else {
@@ -166,12 +157,14 @@ const SignUp = () => {
             <FormField
               title='Password'
               value={form.password}
-              handleChangeText={(text) => {
-                setForm({ ...form, password: text });
-                setErrors((prev) => ({ ...prev, password: undefined }));
+              handleChangeText={(e) => {
+                setForm({ ...form, password: e });
+                // Clear password error when user starts typing
+                if (errors.password) {
+                  setErrors((prev) => ({ ...prev, password: undefined }));
+                }
               }}
               error={errors.password}
-              secureTextEntry
               otherStyles='mt-4'
               isPassword
             />
@@ -184,8 +177,8 @@ const SignUp = () => {
                 setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
               }}
               error={errors.confirmPassword}
-              secureTextEntry
               otherStyles='mt-4'
+              isPassword
             />
 
             <CustomButton
