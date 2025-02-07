@@ -6,7 +6,6 @@ export const fetchUserData = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     try {
       const response = await api.get(`/api/user/get`, { params: { userId } });
-      console.log('response', response);
       if (!response.ok) {
         throw new Error('Failed to fetch user data');
       }
