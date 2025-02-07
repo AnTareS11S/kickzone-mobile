@@ -1,21 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
-
-import { useForm, Controller } from 'react-hook-form';
+import { View, Text, Alert } from 'react-native';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup';
-import { useNavigation } from '@react-navigation/native';
 import FormField from '../../components/FormField';
 import api from '../../lib/api';
-import { Picker } from '@react-native-picker/picker';
 import { fetchUserData, updateOnboarding } from '../../redux/userSlice';
+import CustomButton from '../../components/CustomButton';
+import PickerField from '../../components/PickerField';
+import { useRouter } from 'expo-router';
 
 // Define the validation schema using yup
 const onboardingFormSchema = Yup.object().shape({
@@ -30,16 +24,14 @@ const Onboarding = () => {
   const { currentUser } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const navigation = useNavigation();
-
-  console.log(currentUser);
+  const router = useRouter();
 
   const { control, handleSubmit, reset } = useForm({
     resolver: yupResolver(onboardingFormSchema),
     defaultValues: {
-      wantedRole: '',
       username: '',
       bio: '',
+      wantedRole: '',
     },
     mode: 'onChange',
   });
@@ -63,11 +55,11 @@ const Onboarding = () => {
         ...formData,
       });
 
-      if (res.ok) {
+      if (res.status === 200) {
         dispatch(updateOnboarding(true));
         dispatch(fetchUserData(userId));
         Alert.alert('Success', 'Your profile has been successfully updated!');
-        setTimeout(() => navigation.navigate('Home'), 1500);
+        setTimeout(() => router.replace('/home'), 1500);
       } else {
         throw new Error('Failed to complete onboarding');
       }
@@ -92,50 +84,37 @@ const Onboarding = () => {
         </Text>
 
         <FormField
+          control={control}
+          name='username'
           title='Username'
-          value={control._defaultValues.username}
           placeholder='Enter your username'
-          handleChangeText={(text) => control.setValue('username', text)}
         />
 
         <FormField
+          control={control}
+          name='bio'
           title='Bio'
-          value={control._defaultValues.bio}
           placeholder='Tell us about yourself'
-          handleChangeText={(text) => control.setValue('bio', text)}
         />
 
-        <Text className='text-gray-600 mb-2'>Role</Text>
-        <Controller
+        <PickerField
           control={control}
           name='wantedRole'
-          render={({ field: { value, onChange } }) => (
-            <Picker
-              selectedValue={value}
-              onValueChange={onChange}
-              style={{ height: 50, width: '100%' }}
-            >
-              <Picker.Item label='Select Role' value='' />
-              <Picker.Item label='Player' value='Player' />
-              <Picker.Item label='Coach' value='Coach' />
-              <Picker.Item label='Referee' value='Referee' />
-            </Picker>
-          )}
+          title='Role'
+          options={[
+            { label: 'Player', value: 'Player' },
+            { label: 'Coach', value: 'Coach' },
+            { label: 'Referee', value: 'Referee' },
+          ]}
+          defaultValue={currentUser?.wantedRole || ''}
         />
 
-        <TouchableOpacity
-          onPress={handleSubmit(onSubmit)}
-          disabled={loading}
-          className={`bg-purple-600 py-3 rounded-lg mt-4 ${
-            loading ? 'opacity-50' : ''
-          } flex items-center`}
-        >
-          {loading ? (
-            <ActivityIndicator color='#fff' />
-          ) : (
-            <Text className='text-white font-bold'>Update Profile</Text>
-          )}
-        </TouchableOpacity>
+        <CustomButton
+          title='Update Profile'
+          handlePress={handleSubmit(onSubmit)}
+          containerStyles='w-full mt-10'
+          isLoading={loading}
+        />
       </View>
     </View>
   );
