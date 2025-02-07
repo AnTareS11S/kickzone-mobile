@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  TextInputProps,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 
 import { icons } from '../constants';
 
@@ -20,38 +11,48 @@ const FormField = ({
   otherStyles,
   isPassword = false,
   keyboardType = 'default',
+  error,
+  autoCapitalize = 'none',
   ...rest
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <View className='mb-4' style={otherStyles}>
+    <View className={`mb-4 ${otherStyles}`}>
       <Text
         className='text-base text-gray-700 font-semibold mb-2'
         accessibilityLabel={`${title} input field`}
       >
         {title}
       </Text>
+
       <View
-        className='flex-row items-center bg-white rounded-xl border border-gray-300 shadow-sm'
+        className={`flex-row items-center bg-white rounded-xl border ${
+          error ? 'border-red-500' : 'border-gray-300'
+        } shadow-sm`}
         style={{
           height: 55,
           paddingHorizontal: 15,
         }}
       >
         <TextInput
-          className='flex-1 text-base text-gray-800 font-medium'
+          className={`flex-1 text-base ${
+            error ? 'text-red-500' : 'text-gray-800'
+          } font-medium`}
           value={value}
           placeholder={placeholder}
           placeholderTextColor='#A1A1AA'
-          onChangeText={handleChangeText}
+          onChangeText={(text) => {
+            handleChangeText(text);
+          }}
           keyboardType={keyboardType}
           secureTextEntry={isPassword && !showPassword}
-          autoCapitalize='none'
+          autoCapitalize={autoCapitalize}
           autoCorrect={false}
           accessibilityLabel={placeholder}
           {...rest}
         />
+
         {isPassword && (
           <TouchableOpacity
             onPress={() => setShowPassword(!showPassword)}
@@ -68,6 +69,12 @@ const FormField = ({
           </TouchableOpacity>
         )}
       </View>
+
+      {error && (
+        <View className='mt-1'>
+          <Text className='text-red-500 text-sm'>{error}</Text>
+        </View>
+      )}
     </View>
   );
 };
