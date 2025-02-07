@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useRouter } from 'expo-router';
 import * as Yup from 'yup';
@@ -15,13 +8,37 @@ import FormField from '../../components/FormField';
 import OAuth from '../../components/OAuth';
 import CustomButton from '../../components/CustomButton';
 import api from '../../lib/api';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 const SignUpSchema = Yup.object().shape({
   username: Yup.string()
     .min(3, 'Username must be at least 3 characters')
     .max(20, 'Username must be at most 20 characters')
-    .required('Username is required'),
-  email: Yup.string().email('Invalid email').required('Email is required'),
+    .required('Username is required')
+    .test('username-exists', 'Username does exist already', async (value) => {
+      try {
+        const response = await api.get(`/api/auth/check-username`, {
+          params: { username: value },
+        });
+        return response.data.exists;
+      } catch (error) {
+        return false;
+      }
+    }),
+  email: Yup.string()
+    .email('Invalid email')
+    .required('Email is required')
+    .test('email-exists', 'Email does exist already', async (value) => {
+      try {
+        const response = await api.get(`/api/auth/check-email`, {
+          params: { email: value },
+        });
+        return response.data.exists;
+      } catch (error) {
+        return false;
+      }
+    }),
   password: Yup.string()
     .min(8, 'Password must be at least 8 characters')
     .matches(
@@ -37,66 +54,23 @@ const SignUpSchema = Yup.object().shape({
 
 const SignUp = () => {
   const router = useRouter();
-  const [form, setForm] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+  const { control, handleSubmit, setError } = useForm({
+    resolver: yupResolver(SignUpSchema),
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
   });
-  const [errors, setErrors] = useState({});
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateForm = async () => {
-    try {
-      await SignUpSchema.validate(form, { abortEarly: false });
-      return true;
-    } catch (err) {
-      const errorMessages = {};
-      err.inner.forEach((error) => {
-        errorMessages[error.path] = error.message;
-      });
-      setErrors(errorMessages);
-      return false;
-    }
-  };
-
-  const submit = async () => {
-    const isValid = await validateForm();
-
-    if (!isValid) return;
-
+  const onSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
-      // Check username availability
-      const usernameCheck = await api.get(`/api/auth/check-username`, {
-        params: { username: form.username },
-      });
-
-      if (usernameCheck.data.exists) {
-        setErrors((prev) => ({
-          ...prev,
-          username: 'Username already exists',
-        }));
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Check email availability
-      const emailCheck = await api.get(`/api/auth/check-email`, {
-        params: { email: form.email },
-      });
-
-      if (emailCheck.data.exists) {
-        setErrors((prev) => ({
-          ...prev,
-          email: 'Email already exists',
-        }));
-        setIsSubmitting(false);
-        return;
-      }
-
       // Signup request
-      const response = await api.post('/api/auth/signup', form);
+      const response = await api.post('/api/auth/signup', formData);
 
       if (response.status === 201) {
         // Navigate to sign-in or home screen
@@ -132,58 +106,39 @@ const SignUp = () => {
 
           <View className='mt-4'>
             <FormField
+              control={control}
+              name='username'
               title='Username'
-              value={form.username}
-              handleChangeText={(text) => {
-                setForm({ ...form, username: text });
-                setErrors((prev) => ({ ...prev, username: undefined }));
-              }}
-              error={errors.username}
-              otherStyles='mt-4'
+              placeholder='Enter your username'
             />
 
             <FormField
-              title='Email Address'
-              value={form.email}
-              handleChangeText={(text) => {
-                setForm({ ...form, email: text });
-                setErrors((prev) => ({ ...prev, email: undefined }));
-              }}
-              error={errors.email}
+              control={control}
+              name='email'
+              title='Email'
+              placeholder='Enter your email'
               keyboardType='email-address'
-              otherStyles='mt-4'
             />
 
             <FormField
+              control={control}
+              name='password'
               title='Password'
-              value={form.password}
-              handleChangeText={(e) => {
-                setForm({ ...form, password: e });
-                // Clear password error when user starts typing
-                if (errors.password) {
-                  setErrors((prev) => ({ ...prev, password: undefined }));
-                }
-              }}
-              error={errors.password}
-              otherStyles='mt-4'
+              placeholder='Enter your password'
               isPassword
             />
 
             <FormField
+              control={control}
+              name='confirmPassword'
               title='Confirm Password'
-              value={form.confirmPassword}
-              handleChangeText={(text) => {
-                setForm({ ...form, confirmPassword: text });
-                setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
-              }}
-              error={errors.confirmPassword}
-              otherStyles='mt-4'
+              placeholder='Re-enter your password'
               isPassword
             />
 
             <CustomButton
               title='Create Account'
-              handlePress={submit}
+              handlePress={handleSubmit(onSubmit)}
               containerStyles='w-full'
               isLoading={isSubmitting}
             />
