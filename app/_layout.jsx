@@ -1,6 +1,8 @@
 import { SplashScreen, Stack } from 'expo-router';
 import React, { useEffect } from 'react';
 import { useFonts } from 'expo-font';
+import { store } from '../redux/store';
+import { Provider } from 'react-redux';
 
 SplashScreen.preventAutoHideAsync(); // Prevent the splash screen from auto-hiding
 
@@ -27,26 +29,28 @@ const RootLayout = () => {
 
   return (
     <>
-      <Stack>
-        <Stack.Screen
-          name='index'
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name='(auth)'
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name='(tabs)'
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack>
+      <Provider store={store}>
+        <Stack>
+          <Stack.Screen
+            name='index'
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name='(auth)'
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name='(tabs)'
+            options={{
+              headerShown: false,
+            }}
+          />
+        </Stack>
+      </Provider>
     </>
   );
 };
