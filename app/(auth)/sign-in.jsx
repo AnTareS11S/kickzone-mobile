@@ -6,7 +6,6 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  TouchableOpacity,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,12 +25,24 @@ import {
   signInStart,
   signInSuccess,
 } from '../../redux/userSlice';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 // Validation Schema
 const SignInSchema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email format')
-    .required('Email is required'),
+    .required('Email is required')
+    .test('email-exists', 'Email does not exist', async (value) => {
+      try {
+        const response = await api.get(`/api/auth/check-email`, {
+          params: { email: value },
+        });
+        return response.data.exists;
+      } catch (error) {
+        return false;
+      }
+    }),
   password: Yup.string()
     .min(8, 'Password must be at least 8 characters')
     .required('Password is required'),
@@ -40,29 +51,15 @@ const SignInSchema = Yup.object().shape({
 const SignIn = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
+  const { control, handleSubmit, setError } = useForm({
+    resolver: yupResolver(SignInSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   });
-  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [banInfo, setBanInfo] = useState(null);
-
-  // Validation Function
-  const validateForm = async () => {
-    try {
-      await SignInSchema.validate(form, { abortEarly: false });
-      setErrors({});
-      return true;
-    } catch (err) {
-      const errorMessages = {};
-      err.inner.forEach((error) => {
-        errorMessages[error.path] = error.message;
-      });
-      setErrors(errorMessages);
-      return false;
-    }
-  };
 
   const extractTokenFromCookie = (cookie) => {
     if (!cookie || cookie.length === 0) return null;
@@ -71,33 +68,14 @@ const SignIn = () => {
     return tokenMatch ? tokenMatch[1] : null;
   };
 
-  const submit = async () => {
-    // Validate form
-    const isValid = await validateForm();
-    if (!isValid) return;
-
-    // Check if email exists
-    const emailCheck = await api.get(`/api/auth/check-email`, {
-      params: { email: form.email },
-    });
-
-    if (!emailCheck.data.exists) {
-      setErrors((prev) => ({
-        ...prev,
-        email: 'Email does not exist',
-      }));
-      setIsSubmitting(false);
-      return;
-    }
-
+  const onSubmit = async (formData) => {
     dispatch(signInStart());
-
     setIsSubmitting(true);
     try {
       // Attempt login
-      const response = await api.post('/api/auth/signin', form);
+      const response = await api.post('/api/auth/signin', formData);
 
-      // Bezpieczniejsze sprawdzanie danych
+      // Handle response
       const data = response.data;
 
       const token = extractTokenFromCookie(response.headers['set-cookie']);
@@ -107,24 +85,7 @@ const SignIn = () => {
         return;
       }
 
-      // Handle ban scenarios
-      if (response.status === 405 && data.banInfo) {
-        setBanInfo(data.banInfo);
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Handle invalid password
-      if (response.status === 403) {
-        setErrors((prev) => ({
-          ...prev,
-          password: 'Invalid password',
-        }));
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Handle login failure
+      // Handle login success and failure
       if (response.status === 200) {
         dispatch(signInSuccess(data));
         Alert.alert('Success', 'Logged in successfully');
@@ -147,26 +108,31 @@ const SignIn = () => {
         router.replace('/home');
       }
     } catch (error) {
-      console.error('Login error details:', error);
-      dispatch(signInFailure(error.response.data.message));
-
-      if (error.response) {
-        // Serwer zwrócił błąd poza zakresem 2xx
-        console.error('Server error response:', error.response.data);
-        Alert.alert(
-          'Login Error',
-          error.response.data.message || 'Server error'
-        );
-      } else if (error.request) {
-        // Żądanie zostało wysłane, ale nie otrzymano odpowiedzi
-        console.error('No response received');
-        Alert.alert('Network Error', 'No response from server');
-      } else {
-        // Coś poszło nie tak podczas przygotowania żądania
-        console.error('Error setting up request', error.message);
-        Alert.alert('Error', 'Unable to process login');
+      // Handle ban scenarios
+      if (error.response.status === 405 && error.response.data.banInfo) {
+        setBanInfo(error.response.data.banInfo);
+        setIsSubmitting(false);
+        return;
       }
 
+      // Handle invalid password
+      if (error.response.status === 403) {
+        setError('password', {
+          type: 'manual',
+          message: 'Invalid password',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      console.error('Login error:', error.response);
+      dispatch(
+        signInFailure(error?.response?.data?.message || 'Unknown error')
+      );
+      Alert.alert(
+        'Login Error',
+        error?.response?.data?.message || 'Server error'
+      );
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -229,40 +195,25 @@ const SignIn = () => {
             {/* Form Section */}
             <View className='w-full'>
               <FormField
-                title='Email Address'
-                value={form.email}
-                handleChangeText={(e) => {
-                  setForm({ ...form, email: e });
-                  // Clear email error when user starts typing
-                  if (errors.email) {
-                    setErrors((prev) => ({ ...prev, email: undefined }));
-                  }
-                }}
-                error={errors.email}
-                otherStyles='mb-4'
+                control={control}
+                name='email'
+                title='Email'
+                placeholder='Enter your email'
                 keyboardType='email-address'
-                autoCapitalize='none'
               />
 
               <FormField
+                control={control}
+                name='password'
                 title='Password'
-                value={form.password}
-                handleChangeText={(e) => {
-                  setForm({ ...form, password: e });
-                  // Clear password error when user starts typing
-                  if (errors.password) {
-                    setErrors((prev) => ({ ...prev, password: undefined }));
-                  }
-                }}
-                error={errors.password}
-                otherStyles='mb-6'
+                placeholder='Enter your password'
                 isPassword
               />
 
               {/* Sign In Button */}
               <CustomButton
                 title='Sign In'
-                handlePress={submit}
+                handlePress={handleSubmit(onSubmit)}
                 containerStyles='w-full'
                 isLoading={isSubmitting}
                 disabled={!!banInfo}
