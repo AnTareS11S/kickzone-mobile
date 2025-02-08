@@ -21,6 +21,7 @@ const Home = () => {
   const { data: posts, isLoading, refetch } = useFetch('api/post/all');
   const [postLikes, setPostLikes] = useState({});
   const [isLikeProcessing, setIsLikeProcessing] = useState(false);
+  const [comments, setComments] = useState({});
 
   // Refresh posts when screen comes into focus
   useFocusEffect(
@@ -33,12 +34,15 @@ const Home = () => {
   useEffect(() => {
     if (posts && Array.isArray(posts)) {
       const newPostLikes = {};
+      const newComments = {};
       posts.forEach((post) => {
         newPostLikes[post._id] = {
           likes: post.likes || [],
           isLiked: post.likes?.includes(currentUser?._id) || false,
         };
+        newComments[post._id] = post.children || [];
       });
+      setComments(newComments);
       setPostLikes(newPostLikes);
     }
   }, [posts, currentUser?._id]);
@@ -168,7 +172,7 @@ const Home = () => {
             <TouchableOpacity className='flex-row items-center space-x-1'>
               <Feather name='message-circle' color='#888' size={16} />
               <Text className='text-gray-600 text-sm'>
-                {item.comments?.length || 0}
+                {comments[item._id]?.length || 0}
               </Text>
             </TouchableOpacity>
           </View>
