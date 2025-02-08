@@ -6,7 +6,6 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useRouter } from 'expo-router';
@@ -27,6 +26,7 @@ import {
 } from '../../redux/userSlice';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import Toast from 'react-native-toast-message';
 
 // Validation Schema
 const SignInSchema = Yup.object().shape({
@@ -81,17 +81,32 @@ const SignIn = () => {
       const token = extractTokenFromCookie(response.headers['set-cookie']);
 
       if (!token) {
-        Alert.alert('Login Error', 'Could not retrieve authentication token');
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Invalid token',
+          visibilityTime: 4000,
+        });
         return;
       }
 
       // Handle login success and failure
       if (response.status === 200) {
         dispatch(signInSuccess(data));
-        Alert.alert('Success', 'Logged in successfully');
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Logged in successfully',
+          visibilityTime: 4000,
+        });
       } else {
         console.error('Login failed:', response.statusText);
-        Alert.alert('Login Failed', response.statusText || 'Unable to log in');
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: response.statusText,
+          visibilityTime: 4000,
+        });
         dispatch(signInFailure(response.statusText));
         setIsSubmitting(false);
         return;
@@ -128,10 +143,12 @@ const SignIn = () => {
       dispatch(
         signInFailure(error?.response?.data?.message || 'Unknown error')
       );
-      Alert.alert(
-        'Login Error',
-        error?.response?.data?.message || 'Server error'
-      );
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: error?.response?.data?.message || 'Unknown error',
+        visibilityTime: 4000,
+      });
     } finally {
       setIsSubmitting(false);
     }
