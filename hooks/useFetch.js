@@ -1,40 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import api from '../lib/api';
 
-const useFetch = (endpoint, query) => {
+const useFetch = (endpoint) => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const options = {
-    method: 'GET',
-    url: `${process.env.API_URL}/${endpoint}`,
-    params: {
-      ...query,
-    },
-  };
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await axios.request(options);
-      setData(res.data);
-      setIsLoading(false);
-    } catch (error) {
-      setError(error);
+      const response = await api.get(endpoint);
+      setData(response.data);
+      setError(null);
+    } catch (err) {
+      setError(err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [endpoint]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
-  const refetch = () => {
-    setIsLoading(true);
-    fetchData();
-  };
+  const refetch = useCallback(() => {
+    return fetchData();
+  }, [fetchData]);
 
   return { data, isLoading, error, refetch };
 };
