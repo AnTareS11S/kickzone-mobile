@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,38 @@ import {
 } from 'react-native';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import useFetch from '../../hooks/useFetch';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import api from '../../lib/api';
+import { useSelector } from 'react-redux';
+
+const LIKE_THROTTLE_DELAY = 300;
 
 const Home = () => {
-  const { data: posts, isLoading, error, refetch } = useFetch('api/post/all');
+  const { currentUser } = useSelector((state) => state.user);
+  const { data: posts, isLoading, refetch } = useFetch('api/post/all');
+  const [postLikes, setPostLikes] = useState({});
+  const [isLikeProcessing, setIsLikeProcessing] = useState(false);
+
+  // Refresh posts when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  // Update likes when posts data changes
+  useEffect(() => {
+    if (posts && Array.isArray(posts)) {
+      const newPostLikes = {};
+      posts.forEach((post) => {
+        newPostLikes[post._id] = {
+          likes: post.likes || [],
+          isLiked: post.likes?.includes(currentUser?._id) || false,
+        };
+      });
+      setPostLikes(newPostLikes);
+    }
+  }, [posts, currentUser?._id]);
 
   const handleBackPress = () => {
     Alert.alert('Exit App', 'Are you sure you want to exit?', [
@@ -36,6 +64,45 @@ const Home = () => {
         BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
       };
     })
+  );
+
+  const handleLike = useCallback(
+    async (id) => {
+      if (!currentUser._id) {
+        router.replace('/sign-in');
+        return;
+      }
+
+      if (isLikeProcessing) return;
+
+      setIsLikeProcessing(true);
+
+      try {
+        const isLiked = postLikes[id]?.isLiked;
+        const endpoint = `/api/post/${isLiked ? 'unlike' : 'like'}/${id}`;
+
+        const res = await api.post(endpoint, {
+          userId: currentUser._id,
+        });
+
+        if (res.status === 200) {
+          setPostLikes((prev) => ({
+            ...prev,
+            [id]: {
+              likes: isLiked
+                ? prev[id].likes.filter((id) => id !== currentUser._id)
+                : [...prev[id].likes, currentUser._id],
+              isLiked: !isLiked,
+            },
+          }));
+        }
+      } catch (error) {
+        console.error('Error toggling like:', error);
+      } finally {
+        setTimeout(() => setIsLikeProcessing(false), LIKE_THROTTLE_DELAY);
+      }
+    },
+    [currentUser?._id, postLikes, isLikeProcessing]
   );
 
   const renderPost = ({ item }) => (
@@ -75,12 +142,26 @@ const Home = () => {
 
           <View className='flex-row items-center space-x-3'>
             <TouchableOpacity
-              className='flex-row items-center space-x-1'
+              className={`flex flex-row items-center space-x-1 ${
+                postLikes[item._id]?.isLiked
+                  ? 'text-red-500'
+                  : 'text-gray-500 dark:text-gray-400'
+              } ${
+                !currentUser?._id || isLikeProcessing
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
+              }`}
               onPress={() => handleLike(item._id)}
+              disabled={!currentUser?._id || isLikeProcessing}
             >
-              <AntDesign name='hearto' color='#888' size={16} />
+              {postLikes[item._id]?.isLiked ? (
+                <AntDesign name='heart' color='#f00' size={16} />
+              ) : (
+                <AntDesign name='hearto' color='#888' size={16} />
+              )}
+
               <Text className='text-gray-600 text-sm'>
-                {item.likes?.length || 0}
+                {postLikes[item._id]?.likes.length || 0}
               </Text>
             </TouchableOpacity>
 
