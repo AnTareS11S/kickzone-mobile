@@ -11,27 +11,13 @@ import { useSelector } from 'react-redux';
 import { useForm, Controller } from 'react-hook-form';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'expo-image-picker';
-import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import CustomButton from '../../components/CustomButton';
 import FormField from '../../components/FormField';
 import api from '../../lib/api';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
-
-const PostFormSchema = (isEdit) =>
-  Yup.object().shape({
-    title: Yup.string()
-      .min(3, 'Title must be at least 3 characters long')
-      .max(50, 'Title must be less than 50 characters long')
-      .required('Title is required'),
-    postContent: Yup.string()
-      .min(3, 'Content must be at least 3 characters long')
-      .required('Content is required'),
-    postPhoto: isEdit
-      ? Yup.mixed().nullable()
-      : Yup.mixed().required('Photo is required'),
-  });
+import { PostFormSchema } from '../../lib/validation';
 
 const CreateForm = () => {
   const router = useRouter();
