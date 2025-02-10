@@ -114,6 +114,8 @@ const Onboarding = () => {
           handlePress={handleSubmit(onSubmit)}
           containerStyles='w-full mt-10'
           isLoading={loading}
+          disabled={loading}
+          sendingIndicator='Updating...'
         />
       </View>
     </View>
