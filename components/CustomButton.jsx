@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-  View,
-  StyleProp,
-  TextStyle,
-  ViewStyle,
-} from 'react-native';
+import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 
 const CustomButton = ({
   title,
@@ -18,6 +10,7 @@ const CustomButton = ({
   variant = 'primary',
   fullWidth = false,
   disabled = false,
+  sendingIndicator,
 }) => {
   // Button style variants
   const variantStyles = {
@@ -70,7 +63,7 @@ const CustomButton = ({
             ${textStyles}
           `}
         >
-          {title}
+          {disabled ? sendingIndicator : title}
         </Text>
       )}
     </TouchableOpacity>
