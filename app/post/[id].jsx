@@ -7,13 +7,21 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   TextInput,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { AntDesign, Feather } from '@expo/vector-icons';
+import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import useFetch from '../../hooks/useFetch';
 import api from '../../lib/api';
 import CommentItem from '../../components/CommentItem';
+import Toast from 'react-native-toast-message';
+import * as ImagePicker from 'expo-image-picker';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { PostFormSchema } from '../../lib/validation';
+import { useForm } from 'react-hook-form';
+import FormField from '../../components/FormField';
+import CustomButton from '../../components/CustomButton';
 
 const LIKE_THROTTLE_DELAY = 300;
 
@@ -24,20 +32,69 @@ const PostDetails = () => {
   const [isLikeProcessing, setIsLikeProcessing] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedImage, setEditedImage] = useState(null);
   const [postData, setPostData] = useState({
     likes: [],
     isLiked: false,
   });
 
-  // Update likes when post data changes
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(PostFormSchema(true)),
+    defaultValues: {
+      title: '',
+      postContent: '',
+      postPhoto: null,
+    },
+  });
+
+  // Update likes and edited content when post data changes
   useEffect(() => {
     if (post) {
       setPostData({
         likes: post.likes || [],
         isLiked: post.likes?.includes(currentUser?._id) || false,
       });
+      reset({
+        title: post.title,
+        postContent: post.postContent,
+        postPhoto: post.imageUrl,
+      });
+      setEditedImage(post.imageUrl);
     }
   }, [post, currentUser?._id]);
+
+  const isAuthor = currentUser?._id === post?.author?._id;
+
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        setEditedImage(result.assets[0].uri);
+        setValue('postPhoto', result.assets[0], { shouldValidate: true });
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to pick image',
+        visibilityTime: 4000,
+      });
+    }
+  };
 
   const handleLike = useCallback(async () => {
     if (!currentUser._id) {
@@ -89,13 +146,97 @@ const PostDetails = () => {
 
       if (res.status === 200) {
         setNewComment('');
-        refetch(); // Refresh post data to get new comment
+        refetch();
       }
     } catch (error) {
       console.error('Error adding comment:', error);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEdit = async (formData) => {
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('postContent', formData.postContent);
+
+    if (editedImage && editedImage !== post.imageUrl) {
+      const fileToUpload = {
+        uri: editedImage,
+        type: 'image/jpeg',
+        name: 'photo.jpg',
+      };
+      data.append('postPhoto', fileToUpload);
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await api.post(`/api/post/edit/${id}`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (res.status === 200) {
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Post updated successfully',
+          visibilityTime: 4000,
+        });
+        setIsEditing(false);
+        refetch();
+      }
+    } catch (error) {
+      console.error('Error updating post:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to update post',
+        visibilityTime: 4000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    Alert.alert(
+      'Delete Post',
+      'Are you sure you want to delete this post? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const res = await api.delete(`/api/post/delete/${id}`);
+              if (res.status === 200) {
+                Toast.show({
+                  type: 'success',
+                  text1: 'Success',
+                  text2: 'Post deleted successfully',
+                  visibilityTime: 4000,
+                });
+                router.replace('/home');
+              }
+            } catch (error) {
+              console.error('Error deleting post:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to delete post',
+                visibilityTime: 4000,
+              });
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (isLoading) {
@@ -118,28 +259,119 @@ const PostDetails = () => {
     <>
       <ScrollView className='flex-1 bg-gray-50'>
         <View className='p-4'>
-          {post.imageUrl && (
-            <Image
-              source={{ uri: post.imageUrl }}
-              className='w-full h-48 rounded-xl object-cover mb-4'
-            />
+          {isEditing ? (
+            <View className='mb-4'>
+              {/* Image Edit Section */}
+              <TouchableOpacity
+                onPress={pickImage}
+                className='w-full h-48 rounded-xl mb-4 justify-center items-center'
+                style={{
+                  backgroundColor: editedImage ? 'transparent' : '#f0f0f0',
+                }}
+              >
+                {editedImage ? (
+                  <Image
+                    source={{ uri: editedImage }}
+                    className='w-full h-48 rounded-xl object-cover'
+                  />
+                ) : (
+                  <View className='items-center'>
+                    <MaterialIcons
+                      name='add-photo-alternate'
+                      size={40}
+                      color='#666'
+                    />
+                    <Text className='text-gray-600 mt-2'>Add Photo</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              {editedImage && (
+                <TouchableOpacity
+                  onPress={() => setEditedImage(null)}
+                  className='absolute right-2 top-2 bg-black/50 rounded-full p-1'
+                >
+                  <MaterialIcons name='close' size={20} color='white' />
+                </TouchableOpacity>
+              )}
+
+              <FormField
+                control={control}
+                name='title'
+                title='Title'
+                placeholder='Enter your title'
+              />
+
+              <FormField
+                control={control}
+                name='postContent'
+                title='Content'
+                placeholder='Enter your content'
+              />
+
+              <View className='flex-row justify-end space-x-2 mt-2'>
+                <TouchableOpacity
+                  className='bg-gray-500 p-2 rounded-lg'
+                  onPress={() => {
+                    setIsEditing(false);
+                    setEditedImage(post.imageUrl);
+                    reset();
+                  }}
+                >
+                  <Text className='text-white'>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className='bg-blue-500 p-2 rounded-lg'
+                  onPress={handleSubmit(handleEdit)}
+                  disabled={isSubmitting}
+                >
+                  <Text className='text-white'>
+                    {isSubmitting ? 'Saving...' : 'Save'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <>
+              {(post.imageUrl || editedImage) && (
+                <Image
+                  source={{ uri: editedImage || post.imageUrl }}
+                  className='w-full h-48 rounded-xl object-cover mb-4'
+                />
+              )}
+
+              <View className='flex-row justify-between items-start mb-2'>
+                <Text className='text-2xl font-bold text-gray-800 flex-1'>
+                  {post.title}
+                </Text>
+                {isAuthor && (
+                  <View className='flex-row space-x-2'>
+                    <TouchableOpacity
+                      onPress={() => setIsEditing(true)}
+                      className='p-2'
+                    >
+                      <MaterialIcons name='edit' size={24} color='#666' />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleDelete} className='p-2'>
+                      <MaterialIcons name='delete' size={24} color='#ff4444' />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+
+              <View className='flex-row items-center space-x-2 mb-4'>
+                <Text className='text-sm text-gray-500'>
+                  {post.author?.username}
+                </Text>
+                <View className='w-1 h-1 bg-gray-300 rounded-full' />
+                <Text className='text-sm text-gray-500'>
+                  {new Date(post.createdAt).toLocaleDateString()}
+                </Text>
+              </View>
+
+              <Text className='text-gray-600 mb-6'>{post.postContent}</Text>
+            </>
           )}
-
-          <Text className='text-2xl font-bold text-gray-800 mb-2'>
-            {post.title}
-          </Text>
-
-          <View className='flex-row items-center space-x-2 mb-4'>
-            <Text className='text-sm text-gray-500'>
-              {post.author?.username}
-            </Text>
-            <View className='w-1 h-1 bg-gray-300 rounded-full' />
-            <Text className='text-sm text-gray-500'>
-              {new Date(post.createdAt).toLocaleDateString()}
-            </Text>
-          </View>
-
-          <Text className='text-gray-600 mb-6'>{post.postContent}</Text>
 
           <View className='flex-row items-center space-x-4 mb-6'>
             <TouchableOpacity
