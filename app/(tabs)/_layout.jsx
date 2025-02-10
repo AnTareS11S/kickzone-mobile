@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Tabs } from 'expo-router';
 import { icons, images } from '../../constants';
 import { Feather } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
@@ -35,6 +36,7 @@ const Header = ({ onMenuPress }) => {
 };
 
 const TabsLayout = () => {
+  const { currentUser } = useSelector((state) => state.user);
   const handleMenuPress = () => {
     // Implement your menu open logic here
     // This could be navigation to a sidebar, opening a modal, etc.
@@ -96,20 +98,22 @@ const TabsLayout = () => {
             ),
           }}
         />
-        <Tabs.Screen
-          name='create'
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                icon={icons.plus}
-                color={color}
-                name='Create'
-                focused={focused}
-              />
-            ),
-          }}
-        />
+        {(currentUser?.role === 'Coach' || currentUser?.role === 'Referee') && (
+          <Tabs.Screen
+            name='create'
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  icon={icons.plus}
+                  color={color}
+                  name='Create'
+                  focused={focused}
+                />
+              ),
+            }}
+          />
+        )}
         <Tabs.Screen
           name='profile'
           options={{
