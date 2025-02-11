@@ -180,7 +180,7 @@ const CommentItem = ({ comment, currentUser, onRefresh, level = 0 }) => {
                 <Text>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className={`px-3 py-1 rounded-lg bg-blue-500 ${
+                className={`px-3 py-1 rounded-lg bg-blpurpleue-500 ${
                   !editContent.trim() || isSubmitting ? 'opacity-50' : ''
                 }`}
                 onPress={handleEdit}
@@ -233,7 +233,7 @@ const CommentItem = ({ comment, currentUser, onRefresh, level = 0 }) => {
               multiline
             />
             <TouchableOpacity
-              className={`bg-blue-500 p-2 rounded-lg ${
+              className={`bg-purple-500 p-2 rounded-lg ${
                 !replyContent.trim() || isSubmitting ? 'opacity-50' : ''
               }`}
               onPress={handleReply}
