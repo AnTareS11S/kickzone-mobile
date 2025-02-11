@@ -115,7 +115,7 @@ const TabsLayout = () => {
           />
         )}
         <Tabs.Screen
-          name='profile'
+          name='leagues'
           options={{
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
