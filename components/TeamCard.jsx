@@ -1,10 +1,25 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
 import { Card } from '@rneui/themed';
 import { useRouter } from 'expo-router';
 
-const TeamCard = ({ data }) => {
+const TeamCard = ({ data, loading }) => {
   const router = useRouter();
+
+  if (loading) {
+    return (
+      <View className='flex-1 items-center justify-center'>
+        <ActivityIndicator size='large' />
+      </View>
+    );
+  }
 
   const renderTeamCard = ({ item: team }) => (
     <TouchableOpacity
