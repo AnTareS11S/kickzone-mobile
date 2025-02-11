@@ -120,7 +120,7 @@ const CreateForm = () => {
   return (
     <ScrollView className='flex-1 p-4'>
       <View className='bg-white rounded-xl shadow-lg'>
-        <View className='bg-blue-500 p-4 flex-row items-center'>
+        <View className='bg-purple-500 p-4 flex-row items-center'>
           <Icon name='edit' size={24} color='white' className='mr-3' />
           <Text className='text-2xl font-bold text-white'>Create New Post</Text>
         </View>

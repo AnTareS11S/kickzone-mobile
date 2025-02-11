@@ -21,7 +21,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { PostFormSchema } from '../../lib/validation';
 import { useForm } from 'react-hook-form';
 import FormField from '../../components/FormField';
-import CustomButton from '../../components/CustomButton';
 
 const LIKE_THROTTLE_DELAY = 300;
 
@@ -321,7 +320,7 @@ const PostDetails = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className='bg-blue-500 p-2 rounded-lg'
+                  className='bg-purple-500 p-2 rounded-lg'
                   onPress={handleSubmit(handleEdit)}
                   disabled={isSubmitting}
                 >
@@ -415,7 +414,7 @@ const PostDetails = () => {
                 multiline
               />
               <TouchableOpacity
-                className={`bg-blue-500 p-3 rounded-lg ${
+                className={`bg-purple-500 p-3 rounded-lg ${
                   !newComment.trim() || isSubmitting ? 'opacity-50' : ''
                 }`}
                 onPress={handleAddComment}
