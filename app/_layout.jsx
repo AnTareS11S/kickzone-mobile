@@ -126,6 +126,14 @@ const RootLayout = () => {
               headerBackTitle: 'Back',
             }}
           />
+          <Stack.Screen
+            name='league/[id]'
+            options={({ route }) => ({
+              title: route.params.name,
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            })}
+          />
         </Stack>
         <Toast config={toastConfig} />
       </Provider>
