@@ -8,7 +8,6 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
-import { Card } from '@rneui/themed';
 import { useRouter } from 'expo-router';
 import api from '../lib/api';
 
@@ -147,7 +146,6 @@ const PlayerStats = ({ leagueId, type }) => {
       <View className='min-w-full'>
         {renderTableHeader()}
 
-        {/* Jeśli nie ma danych, pokaż komunikat */}
         {playersStats.length === 0 ? (
           <View className='items-center py-4'>
             <Text className='text-gray-500 text-base'>No data available</Text>

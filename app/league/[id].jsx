@@ -2,7 +2,6 @@ import React from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-
 import TeamCard from '../../components/TeamCard';
 import TableComponent from '../../components/TableComponent';
 import useFetch from '../../hooks/useFetch';
