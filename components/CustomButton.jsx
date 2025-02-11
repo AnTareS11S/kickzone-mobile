@@ -15,9 +15,9 @@ const CustomButton = ({
   // Button style variants
   const variantStyles = {
     primary: {
-      container: 'bg-purple-500 border border-blue-600',
+      container: 'bg-purple-500 border border-purple-600',
       text: 'text-white',
-      disabledContainer: 'bg-purple-300 border-blue-300',
+      disabledContainer: 'bg-purple-300 border-purple-300',
     },
     secondary: {
       container: 'bg-gray-100 border border-gray-200',
