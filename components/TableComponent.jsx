@@ -22,17 +22,15 @@ const TableComponent = ({ leagueId }) => {
 
   const handleDownloadXLSX = async () => {
     try {
-      const response = await api.get(`/api/team/download-xlsx/${leagueId}`);
-      const blob = await response.blob();
-
-      const fileUri = FileSystem.documentDirectory + 'LeagueStandings.xlsx';
-      const base64 = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-        reader.readAsDataURL(blob);
+      const response = await api.get(`/api/team/download-xlsx/${leagueId}`, {
+        responseType: 'base64',
       });
 
-      await FileSystem.writeAsStringAsync(fileUri, base64, {
+      const blob = await response.data;
+
+      const fileUri = FileSystem.documentDirectory + 'LeagueStandings.xlsx';
+
+      await FileSystem.writeAsStringAsync(fileUri, blob, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
