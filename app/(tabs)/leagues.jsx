@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  ActivityIndicator,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { SelectList } from 'react-native-dropdown-select-list';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
 import LeagueCard from '../../components/LeagueCard';
 import api from '../../lib/api';
 import Toast from 'react-native-toast-message';
