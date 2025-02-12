@@ -150,6 +150,22 @@ const RootLayout = () => {
               headerBackTitle: 'Back',
             })}
           />
+          <Stack.Screen
+            name='coach/[id]'
+            options={({ route }) => ({
+              title: '',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            })}
+          />
+          <Stack.Screen
+            name='referee/[id]'
+            options={({ route }) => ({
+              title: '',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            })}
+          />
         </Stack>
         <Toast config={toastConfig} />
       </Provider>
