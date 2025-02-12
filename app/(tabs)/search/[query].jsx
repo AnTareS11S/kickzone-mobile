@@ -8,12 +8,12 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import api from '../../../lib/api';
+import { useRouter } from 'expo-router';
 
 const SearchResult = ({ title, items, iconName, linkPrefix }) => {
-  const navigation = useNavigation();
+  const router = useRouter();
 
   return (
     <View className='my-2'>
@@ -25,7 +25,7 @@ const SearchResult = ({ title, items, iconName, linkPrefix }) => {
       {items.map((item) => (
         <TouchableOpacity
           key={item._id}
-          onPress={() => navigation.navigate(linkPrefix, { id: item._id })}
+          onPress={() => router.push(`/${linkPrefix}/${item._id}`)}
           className='bg-white rounded-lg shadow-sm mb-2 p-2'
         >
           <View className='flex-row items-center'>
@@ -117,7 +117,7 @@ const Search = () => {
                 title='Players'
                 items={searchResults.players}
                 iconName='user'
-                linkPrefix='Player'
+                linkPrefix='player'
               />
             )}
             {searchResults.coaches && searchResults.coaches.length > 0 && (
@@ -125,7 +125,7 @@ const Search = () => {
                 title='Coaches'
                 items={searchResults.coaches}
                 iconName='user-secret'
-                linkPrefix='Coach'
+                linkPrefix='coach'
               />
             )}
             {searchResults.referees && searchResults.referees.length > 0 && (
@@ -133,7 +133,7 @@ const Search = () => {
                 title='Referees'
                 items={searchResults.referees}
                 iconName='gavel'
-                linkPrefix='Referee'
+                linkPrefix='referee'
               />
             )}
             {searchResults.teams && searchResults.teams.length > 0 && (
@@ -141,7 +141,7 @@ const Search = () => {
                 title='Teams'
                 items={searchResults.teams}
                 iconName='futbol-o'
-                linkPrefix='Team'
+                linkPrefix='team'
               />
             )}
             {Object.values(searchResults).every((arr) => arr.length === 0) && (
