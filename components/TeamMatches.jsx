@@ -19,6 +19,7 @@ const TeamMatches = () => {
   const { data: seasons, isLoading } = useFetch('/api/admin/season');
   const [selectedSeason, setSelectedSeason] = useState('');
   const router = useRouter();
+
   useEffect(() => {
     if (seasons.length > 0) {
       const lastSeason = seasons[seasons.length - 1]._id;
@@ -84,8 +85,8 @@ const TeamMatches = () => {
         <View className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
           {filteredMatches.map((match) => (
             <TouchableOpacity
-              key={match._id}
-              onPress={() => router.push(`/match/${match._id}`)}
+              key={match?._id}
+              onPress={() => router.push(`/match/${match?._id}`)}
               className='bg-white rounded-lg shadow-md p-4'
             >
               <Text className='text-xl font-semibold text-gray-800 mb-2'>
