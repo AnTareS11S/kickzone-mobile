@@ -136,35 +136,59 @@ const RootLayout = () => {
           />
           <Stack.Screen
             name='team/[id]'
-            options={({ route }) => ({
+            options={{
               title: '',
               animation: 'slide_from_right',
               headerBackTitle: 'Back',
-            })}
+            }}
           />
           <Stack.Screen
             name='player/[id]'
-            options={({ route }) => ({
+            options={{
               title: '',
               animation: 'slide_from_right',
               headerBackTitle: 'Back',
-            })}
+            }}
           />
           <Stack.Screen
             name='coach/[id]'
-            options={({ route }) => ({
+            options={{
               title: '',
               animation: 'slide_from_right',
               headerBackTitle: 'Back',
-            })}
+            }}
           />
           <Stack.Screen
             name='referee/[id]'
-            options={({ route }) => ({
+            options={{
               title: '',
               animation: 'slide_from_right',
               headerBackTitle: 'Back',
-            })}
+            }}
+          />
+          <Stack.Screen
+            name='stadium/[id]'
+            options={{
+              title: '',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            }}
+          />
+          <Stack.Screen
+            name='result/[id]'
+            options={{
+              title: '',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            }}
+          />
+          <Stack.Screen
+            name='match/[id]'
+            options={{
+              title: '',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            }}
           />
         </Stack>
         <Toast config={toastConfig} />
