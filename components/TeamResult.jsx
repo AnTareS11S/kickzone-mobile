@@ -57,7 +57,7 @@ const TeamResult = () => {
     return matchResults.map((result) => (
       <TouchableOpacity
         key={result._id}
-        onPress={() => router.push(`/results/${result._id}`)}
+        onPress={() => router.push(`/result/${result._id}`)}
         className='bg-white mb-4 rounded-lg shadow-sm'
       >
         <View className='p-4 border border-gray-200 rounded-lg'>
