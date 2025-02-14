@@ -1,6 +1,13 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { Tabs } from 'expo-router';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Modal,
+  Pressable,
+} from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
 import { icons, images } from '../../constants';
 import { Feather } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
@@ -24,6 +31,20 @@ const TabIcon = ({ icon, color, name, focused }) => {
   );
 };
 
+const MenuOption = ({ icon, title, onPress }) => {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      className='flex-row items-center px-6 py-4 border-b border-gray-200'
+    >
+      <Feather name={icon} size={20} color='#333' />
+      <Text className='ml-4 font-pregular text-base text-gray-800'>
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
 const Header = ({ onMenuPress }) => {
   return (
     <View className='bg-white flex-row items-center justify-between px-4 py-5 mt-5 border-b border-gray-200'>
@@ -36,16 +57,91 @@ const Header = ({ onMenuPress }) => {
 };
 
 const TabsLayout = () => {
+  const [menuVisible, setMenuVisible] = useState(false);
   const { currentUser } = useSelector((state) => state.user);
+  const router = useRouter();
+
   const handleMenuPress = () => {
-    // Implement your menu open logic here
-    // This could be navigation to a sidebar, opening a modal, etc.
-    console.log('Menu pressed');
+    setMenuVisible(true);
+  };
+
+  const handleMenuOptionPress = (screen) => {
+    setMenuVisible(false);
+    // Navigate to the selected screen
+    if (screen) {
+      router.push(screen);
+    }
   };
 
   return (
     <View className='flex-1'>
       <Header onMenuPress={handleMenuPress} />
+
+      {/* Menu Modal */}
+      <Modal
+        animationType='slide'
+        transparent={true}
+        visible={menuVisible}
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <View className='flex-1 bg-black/30'>
+          <Pressable className='flex-1' onPress={() => setMenuVisible(false)} />
+          <View className='bg-white rounded-t-2xl shadow-lg'>
+            <View className='items-center py-2'>
+              <View className='w-10 h-1 bg-gray-300 rounded-full'></View>
+            </View>
+            <View className='py-4'>
+              <MenuOption
+                icon='user'
+                title='Profile'
+                onPress={() => handleMenuOptionPress('/profile')}
+              />
+              <MenuOption
+                icon='settings'
+                title='Settings'
+                onPress={() => handleMenuOptionPress('/settings')}
+              />
+              <MenuOption
+                icon='info'
+                title='About'
+                onPress={() => handleMenuOptionPress('/about')}
+              />
+              <MenuOption
+                icon='compass'
+                title='Explore'
+                onPress={() => handleMenuOptionPress('/explore')}
+              />
+              <MenuOption
+                icon='help-circle'
+                title='FAQ'
+                onPress={() => handleMenuOptionPress('/faq')}
+              />
+              <MenuOption
+                icon='mail'
+                title='Contact'
+                onPress={() => handleMenuOptionPress('/contact')}
+              />
+              <MenuOption
+                icon='shield'
+                title='Privacy Policy'
+                onPress={() => handleMenuOptionPress('/privacy')}
+              />
+              <MenuOption
+                icon='log-out'
+                title='Log Out'
+                onPress={() => handleMenuOptionPress('/logout')}
+              />
+            </View>
+            <TouchableOpacity
+              className='my-4 mx-6 py-3 bg-gray-200 rounded-lg items-center'
+              onPress={() => setMenuVisible(false)}
+            >
+              <Text className='font-psemibold text-gray-800'>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <Tabs
         screenOptions={{
           tabBarShowLabel: false,
