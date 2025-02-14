@@ -190,6 +190,54 @@ const RootLayout = () => {
               headerBackTitle: 'Back',
             }}
           />
+          <Stack.Screen
+            name='about/index'
+            options={{
+              title: 'About Us',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            }}
+          />
+          <Stack.Screen
+            name='faq/index'
+            options={{
+              title: 'FAQ',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            }}
+          />
+          <Stack.Screen
+            name='contact/index'
+            options={{
+              title: 'Contact',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            }}
+          />
+          <Stack.Screen
+            name='privacy/index'
+            options={{
+              title: 'Privacy Policy',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            }}
+          />
+          <Stack.Screen
+            name='explore/index'
+            options={{
+              title: 'Explore',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            }}
+          />
+          <Stack.Screen
+            name='profile/index'
+            options={{
+              title: 'Profile',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            }}
+          />
         </Stack>
         <Toast config={toastConfig} />
       </Provider>
