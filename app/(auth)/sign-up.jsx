@@ -10,6 +10,7 @@ import CustomButton from '../../components/CustomButton';
 import api from '../../lib/api';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import Toast from 'react-native-toast-message';
 
 const SignUpSchema = Yup.object().shape({
   username: Yup.string()
@@ -21,7 +22,7 @@ const SignUpSchema = Yup.object().shape({
         const response = await api.get(`/api/auth/check-username`, {
           params: { username: value },
         });
-        return response.data.exists;
+        return !response.data.exists;
       } catch (error) {
         return false;
       }
@@ -34,7 +35,7 @@ const SignUpSchema = Yup.object().shape({
         const response = await api.get(`/api/auth/check-email`, {
           params: { email: value },
         });
-        return response.data.exists;
+        return !response.data.exists;
       } catch (error) {
         return false;
       }
@@ -54,7 +55,7 @@ const SignUpSchema = Yup.object().shape({
 
 const SignUp = () => {
   const router = useRouter();
-  const { control, handleSubmit, setError } = useForm({
+  const { control, handleSubmit } = useForm({
     resolver: yupResolver(SignUpSchema),
     defaultValues: {
       username: '',
@@ -72,8 +73,14 @@ const SignUp = () => {
       // Signup request
       const response = await api.post('/api/auth/signup', formData);
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         // Navigate to sign-in or home screen
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Signup successful - Please sign in',
+          visibilityTime: 4000,
+        });
         router.replace('/sign-in');
       } else {
         // Handle signup error
@@ -81,7 +88,12 @@ const SignUp = () => {
       }
     } catch (error) {
       console.error('Signup error:', error);
-      // Show error toast or alert
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Signup failed',
+        visibilityTime: 4000,
+      });
     } finally {
       setIsSubmitting(false);
     }
