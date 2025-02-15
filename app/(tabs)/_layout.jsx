@@ -10,7 +10,14 @@ import {
 import { Tabs, useRouter } from 'expo-router';
 import { icons, images } from '../../constants';
 import { Feather } from '@expo/vector-icons';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import Toast from 'react-native-toast-message';
+import {
+  signOutUserFailure,
+  signOutUserStart,
+  signOutUserSuccess,
+} from '../../redux/userSlice';
+import api from '../../lib/api';
 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
@@ -60,9 +67,45 @@ const TabsLayout = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const { currentUser } = useSelector((state) => state.user);
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const handleMenuPress = () => {
     setMenuVisible(true);
+  };
+
+  const handleLogout = async () => {
+    setMenuVisible(false);
+    try {
+      dispatch(signOutUserStart());
+      const res = await api.post('/api/auth/signout');
+
+      if (res.status === 200) {
+        Toast.show({
+          type: 'success',
+          text1: 'Success!',
+          text2: 'You have been logged out',
+        });
+        dispatch(signOutUserSuccess());
+        router.replace('/sign-in');
+      } else {
+        const errorMessage =
+          res.data?.message || 'An error occurred during sign out';
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: errorMessage,
+        });
+        dispatch(signOutUserFailure(errorMessage));
+      }
+    } catch (error) {
+      const errorMessage = error.message || 'An error occurred during sign out';
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: errorMessage,
+      });
+      dispatch(signOutUserFailure(errorMessage));
+    }
   };
 
   const handleMenuOptionPress = (screen) => {
@@ -129,7 +172,7 @@ const TabsLayout = () => {
               <MenuOption
                 icon='log-out'
                 title='Log Out'
-                onPress={() => handleMenuOptionPress('/logout')}
+                onPress={handleLogout}
               />
             </View>
             <TouchableOpacity
