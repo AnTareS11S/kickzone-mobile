@@ -238,6 +238,14 @@ const RootLayout = () => {
               headerBackTitle: 'Back',
             }}
           />
+          <Stack.Screen
+            name='settings/index'
+            options={{
+              title: 'Settings',
+              animation: 'slide_from_right',
+              headerBackTitle: 'Back',
+            }}
+          />
         </Stack>
         <Toast config={toastConfig} />
       </Provider>
