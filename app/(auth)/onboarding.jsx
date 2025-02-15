@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
@@ -87,10 +87,17 @@ const Onboarding = () => {
         text1: 'Error',
         text2: 'Failed to complete onboarding',
       });
-    } finally {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <View className='flex-1 items-center justify-center bg-gray-50'>
+        <ActivityIndicator size='large' color='#0000ff' />
+      </View>
+    );
+  }
 
   return (
     <View className='flex-1 items-center justify-center p-5 bg-gray-50'>
