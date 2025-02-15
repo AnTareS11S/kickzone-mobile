@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
@@ -11,79 +11,81 @@ import {
   IOS_GOOGLE_CLIENT_ID,
   WEB_GOOGLE_CLIENT_ID,
 } from '@env';
+import { useDispatch } from 'react-redux';
+import { signInSuccess } from '../redux/userSlice';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 WebBrowser.maybeCompleteAuthSession();
 
 const OAuth = () => {
   const router = useRouter();
-  const [userInfo, setUserInfo] = useState(null);
+  const dispatch = useDispatch();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: ANDROID_GOOGLE_CLIENT_ID,
     iosClientId: IOS_GOOGLE_CLIENT_ID,
     webClientId: WEB_GOOGLE_CLIENT_ID,
+    scopes: ['profile', 'email'],
   });
 
-  // Check for existing user on component mount
   useEffect(() => {
-    const checkExistingUser = async () => {
-      try {
-        const storedUser = await AsyncStorage.getItem('@user');
-        if (storedUser) {
-          setUserInfo(JSON.parse(storedUser));
+    if (response?.type === 'success') {
+      getUserInfo(response.authentication.accessToken);
+    }
+  }, [response]);
+
+  const getUserInfo = async (token) => {
+    try {
+      const userInfoResponse = await api.get(
+        'https://www.googleapis.com/oauth2/v1/userinfo',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      } catch (error) {
-        console.error('Error checking existing user:', error);
-      }
-    };
-    checkExistingUser();
-  }, []);
+      );
+
+      const userInfo = await userInfoResponse.json();
+
+      handleGoogleAuth(userInfo);
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      Alert.alert('Error', 'Failed to get user information from Google');
+    }
+  };
 
   // Handle Google authentication response
-  useEffect(() => {
-    const handleAuthResponse = async () => {
-      if (response?.type === 'success') {
-        try {
-          const { authentication } = response;
+  const handleGoogleAuth = async (userInfo) => {
+    console.log(userInfo);
+    try {
+      // Authenticate with backend
+      const res = await api.post('/api/auth/google-auth', {
+        email: userInfo.email,
+        name: userInfo.name,
+        photo: userInfo.picture,
+      });
 
-          // Authenticate with backend
-          const res = await api.post('/api/auth/google-auth', {
-            token: authentication.accessToken,
-          });
+      const data = res.data;
 
-          // Extract token from response
-          const token =
-            res.data.token || res.headers.authorization?.replace('Bearer ', '');
+      // Securely store user  info
+      await SecureStore.setItemAsync('user', JSON.stringify(data.user));
 
-          if (!token) {
-            throw new Error('No authentication token received');
-          }
+      dispatch(signInSuccess(data));
 
-          // Securely store token
-          await SecureStore.setItemAsync('userToken', token);
-
-          // Store user info
-          await AsyncStorage.setItem('@user', JSON.stringify(res.data.user));
-          setUserInfo(res.data.user);
-
-          // Navigate based on onboarding status
-          if (!res.data.isOnboardingCompleted) {
-            router.replace('/onboarding');
-          } else {
-            router.replace('/home');
-          }
-        } catch (error) {
-          console.error('Google Sign-In Error:', error);
-          Alert.alert(
-            'Login Error',
-            error.response?.data?.message || 'Authentication failed'
-          );
-        }
+      // Navigate based on onboarding status
+      if (!res.data.isOnboardingCompleted) {
+        router.replace('/onboarding');
+      } else {
+        router.replace('/home');
       }
-    };
-
-    handleAuthResponse();
-  }, [response, router]);
+    } catch (error) {
+      console.error('Google Sign-In Error:', error);
+      Alert.alert(
+        'Login Error',
+        error.response?.data?.message || 'Authentication failed'
+      );
+    }
+  };
 
   // Initiate Google Sign-In
   const handleGoogleSignIn = async () => {
@@ -95,29 +97,16 @@ const OAuth = () => {
     }
   };
 
-  // Logout functionality
-  const handleLogout = async () => {
-    try {
-      await SecureStore.deleteItemAsync('userToken');
-      await AsyncStorage.removeItem('@user');
-      setUserInfo(null);
-      router.replace('/login');
-    } catch (error) {
-      console.error('Logout Error:', error);
-    }
-  };
-
   return (
     <View>
       <TouchableOpacity
-        onPress={userInfo ? handleLogout : handleGoogleSignIn}
-        className='flex-row items-center justify-center 
-                    bg-white border border-gray-300 
+        onPress={handleGoogleSignIn}
+        className='flex-row items-center justify-center my-4
+                    bg-white border border-gray-300
                     rounded-xl p-3 space-x-2'
       >
-        <Text className='text-black font-semibold'>
-          {userInfo ? 'Logout' : 'Continue with Google'}
-        </Text>
+        <Icon name='google' size={24} color='black' />
+        <Text className='text-black font-semibold'>Continue with Google</Text>
       </TouchableOpacity>
     </View>
   );
