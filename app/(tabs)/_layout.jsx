@@ -7,7 +7,7 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import { Tabs, useRouter } from 'expo-router';
+import { Redirect, Tabs, useRouter } from 'expo-router';
 import { icons, images } from '../../constants';
 import { Feather } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -116,6 +116,84 @@ const TabsLayout = () => {
     }
   };
 
+  const getTabs = () => {
+    const baseTabs = [
+      {
+        name: 'home',
+        icon: icons.home,
+        label: 'Home',
+      },
+      {
+        name: 'search/[query]',
+        icon: icons.search,
+        label: 'Search',
+      },
+    ];
+
+    if (currentUser?.role === 'Coach') {
+      return [
+        ...baseTabs,
+        {
+          name: 'training',
+          icon: icons.play,
+          label: 'Training',
+        },
+        {
+          name: 'create',
+          icon: icons.plus,
+          label: 'Create',
+        },
+        {
+          name: 'leagues',
+          icon: icons.profile,
+          label: 'Leagues',
+        },
+      ];
+    } else if (currentUser?.role === 'Player') {
+      return [
+        ...baseTabs,
+        {
+          name: 'training',
+          icon: icons.training,
+          label: 'Training',
+        },
+        {
+          name: 'leagues',
+          icon: icons.profile,
+          label: 'Leagues',
+        },
+      ];
+    } else if (
+      currentUser?.role === 'Referee' ||
+      currentUser?.role === 'Admin'
+    ) {
+      return [
+        ...baseTabs,
+        {
+          name: 'create',
+          icon: icons.plus,
+          label: 'Create',
+        },
+        {
+          name: 'leagues',
+          icon: icons.profile,
+          label: 'Leagues',
+        },
+      ];
+    } else {
+      return [
+        ...baseTabs,
+        {
+          name: 'leagues',
+          icon: icons.profile,
+          label: 'Leagues',
+        },
+      ];
+    }
+  };
+
+  const tabsToRender = getTabs();
+
   return (
     <View className='flex-1'>
       <Header onMenuPress={handleMenuPress} />
@@ -209,64 +287,23 @@ const TabsLayout = () => {
           ],
         }}
       >
-        <Tabs.Screen
-          name='home'
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                icon={icons.home}
-                color={color}
-                name='Home'
-                focused={focused}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name='search/[query]'
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                icon={icons.search}
-                color={color}
-                name='Search'
-                focused={focused}
-              />
-            ),
-          }}
-        />
-        {(currentUser?.role === 'Coach' || currentUser?.role === 'Referee') && (
+        {tabsToRender.map((tab) => (
           <Tabs.Screen
-            name='create'
+            key={tab.name}
+            name={tab.name}
             options={{
               headerShown: false,
               tabBarIcon: ({ color, focused }) => (
                 <TabIcon
-                  icon={icons.plus}
+                  icon={tab.icon}
                   color={color}
-                  name='Create'
+                  name={tab.label}
                   focused={focused}
                 />
               ),
             }}
           />
-        )}
-        <Tabs.Screen
-          name='leagues'
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                icon={icons.profile}
-                color={color}
-                name='Leagues'
-                focused={focused}
-              />
-            ),
-          }}
-        />
+        ))}
       </Tabs>
     </View>
   );
