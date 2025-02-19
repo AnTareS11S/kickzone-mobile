@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import { store } from '../redux/store';
 import { Provider } from 'react-redux';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const RefreshContext = createContext();
 
@@ -117,166 +118,168 @@ const RootLayout = () => {
   return (
     <>
       <Provider store={store}>
-        <RefreshProvider>
-          <Stack>
-            <Stack.Screen
-              name='index'
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name='(auth)'
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name='(tabs)'
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name='post/[id]'
-              options={{
-                title: 'Post Details',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='league/[id]'
-              options={({ route }) => ({
-                title: route.params.name,
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              })}
-            />
-            <Stack.Screen
-              name='team/[id]'
-              options={{
-                title: '',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='player/[id]'
-              options={{
-                title: '',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='coach/[id]'
-              options={{
-                title: '',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='referee/[id]'
-              options={{
-                title: '',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='stadium/[id]'
-              options={{
-                title: '',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='result/[id]'
-              options={{
-                title: '',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='match/[id]'
-              options={{
-                title: '',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='about/index'
-              options={{
-                title: 'About Us',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='faq/index'
-              options={{
-                title: 'FAQ',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='contact/index'
-              options={{
-                title: 'Contact',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='privacy/index'
-              options={{
-                title: 'Privacy Policy',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='explore/index'
-              options={{
-                title: 'Explore',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='profile/index'
-              options={{
-                title: 'Profile',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='settings/index'
-              options={{
-                title: 'Settings',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-            <Stack.Screen
-              name='training/[id]'
-              options={{
-                title: 'Training Details',
-                animation: 'slide_from_right',
-                headerBackTitle: 'Back',
-              }}
-            />
-          </Stack>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <RefreshProvider>
+            <Stack>
+              <Stack.Screen
+                name='index'
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name='(auth)'
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name='(tabs)'
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name='post/[id]'
+                options={{
+                  title: 'Post Details',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='league/[id]'
+                options={({ route }) => ({
+                  title: route.params.name,
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                })}
+              />
+              <Stack.Screen
+                name='team/[id]'
+                options={{
+                  title: '',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='player/[id]'
+                options={{
+                  title: '',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='coach/[id]'
+                options={{
+                  title: '',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='referee/[id]'
+                options={{
+                  title: '',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='stadium/[id]'
+                options={{
+                  title: '',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='result/[id]'
+                options={{
+                  title: '',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='match/[id]'
+                options={{
+                  title: '',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='about/index'
+                options={{
+                  title: 'About Us',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='faq/index'
+                options={{
+                  title: 'FAQ',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='contact/index'
+                options={{
+                  title: 'Contact',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='privacy/index'
+                options={{
+                  title: 'Privacy Policy',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='explore/index'
+                options={{
+                  title: 'Explore',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='profile/index'
+                options={{
+                  title: 'Profile',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='settings/index'
+                options={{
+                  title: 'Settings',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+              <Stack.Screen
+                name='training/[id]'
+                options={{
+                  title: 'Training Details',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
+            </Stack>
 
-          <Toast config={toastConfig} />
-        </RefreshProvider>
+            <Toast config={toastConfig} />
+          </RefreshProvider>
+        </GestureHandlerRootView>
       </Provider>
     </>
   );
