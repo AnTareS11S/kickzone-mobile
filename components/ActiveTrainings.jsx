@@ -39,15 +39,15 @@ const ActiveTrainings = ({
     ).start();
   }, [fadeAnim]);
 
-  const handleMarkAsRead = (trainingId) => {
-    if (currentUser?.role === 'Player') {
-      emit('markTeamTrainingNotificationRead', {
-        teamId: currentTeamId,
-        userId: playerId,
-        trainingId,
-      });
-    }
-  };
+  //   const handleMarkAsRead = (trainingId) => {
+  //     if (currentUser?.role === 'Player') {
+  //       emit('markTeamTrainingNotificationRead', {
+  //         teamId: currentTeamId,
+  //         userId: playerId,
+  //         trainingId,
+  //       });
+  //     }
+  //   };
 
   const renderTrainingStatus = () => (
     <View
@@ -118,7 +118,7 @@ const ActiveTrainings = ({
               <Pressable
                 key={training._id}
                 onPress={() => {
-                  handleMarkAsRead(training._id);
+                  //   handleMarkAsRead(training._id);
                   router.push(`/training/${training._id}`);
                 }}
                 className={`p-4 bg-gray-50 rounded-lg ${
