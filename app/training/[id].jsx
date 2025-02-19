@@ -9,27 +9,27 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import ParticipantsList from '../../components/ParticipantsList';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import useFetch from '../../hooks/useFetch';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import api from '../../lib/api';
 import CustomButton from '../../components/CustomButton';
 import { useSelector } from 'react-redux';
+import ParticipantsList from '../../components/ParticipantsList';
 
 const TrainingDetails = () => {
   const { width } = useWindowDimensions();
   const isSmallScreen = width < 375;
   const { id: trainingId } = useLocalSearchParams();
-  const router = useRouter();
   const [training, setTraining] = useState(null);
   const [attendance, setAttendance] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const { currentUser } = useSelector((state) => state.user);
   const { data: player } = useFetch(`/api/player/get/${currentUser?._id}`);
-  const { data: coach } = useFetch(`/api/coach/get/${currentUser?.id}`);
-  const { data: participants } = useFetch(
+  const { data: coach } = useFetch(`/api/coach/get/${currentUser?._id}`);
+  const { data: players } = useFetch(
     `/api/admin/team-player/${coach?.currentTeam}`
   );
 
@@ -175,17 +175,18 @@ const TrainingDetails = () => {
         </View>
 
         {/* Participants List */}
-        {/* {coach && currentUser?.role === 'Coach' && (
+        {coach && currentUser?.role === 'Coach' && (
           <View className='mt-8'>
             <Text className='text-2xl font-bold text-gray-800 mb-4 text-center'>
               Training Participants
             </Text>
             <ParticipantsList
-              participants={participants}
+              participants={players}
               teamId={coach?.currentTeam}
+              trainingId={trainingId}
             />
           </View>
-        )} */}
+        )}
       </View>
     </ScrollView>
   );
