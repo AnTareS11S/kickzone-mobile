@@ -154,7 +154,7 @@ const TabsLayout = () => {
         ...baseTabs,
         {
           name: 'training',
-          icon: icons.training,
+          icon: icons.play,
           label: 'Training',
         },
         {
