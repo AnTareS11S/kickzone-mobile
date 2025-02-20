@@ -2,11 +2,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   ActivityIndicator,
   Switch,
-  Pressable,
   useWindowDimensions,
+  FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -74,119 +73,124 @@ const TrainingDetails = () => {
     );
   }
 
-  return (
-    <ScrollView className='flex-1 bg-gray-50'>
-      <View className='p-4'>
-        {/* Header */}
-        <View className='flex-row justify-between items-center mb-6'>
-          <View className='flex-row items-center space-x-2'>
-            <MaterialCommunityIcons
-              name='clock-outline'
-              size={18}
-              color='gray'
-            />
-            <Text className='text-gray-500'>
-              {new Date(training?.trainingDate).toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}
-            </Text>
-          </View>
+  const renderListHeader = () => (
+    <View className='p-4'>
+      {/* Date Header */}
+      <View className='flex-row justify-between items-center mb-6'>
+        <View className='flex-row items-center space-x-2'>
+          <MaterialCommunityIcons name='clock-outline' size={18} color='gray' />
+          <Text className='text-gray-500'>
+            {new Date(training?.trainingDate).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+            })}
+          </Text>
         </View>
+      </View>
 
-        {/* Main Card */}
-        <LinearGradient
-          colors={['#4F46E5', '#7952B3']}
-          className='rounded-2xl shadow-lg mb-6'
-        >
-          <View className='p-6'>
-            <View className='flex-row justify-between items-start mb-4'>
-              <Text className='text-2xl font-bold text-white'>
-                {training.name}
-              </Text>
-              {training.isActive && (
-                <View className='bg-green-500 px-3 py-1 rounded-full'>
-                  <Text className='text-white text-xs'>Active</Text>
-                </View>
-              )}
-            </View>
-
-            <View className={`flex-row flex-wrap gap-4 mb-6`}>
-              <DetailItem
-                icon='clock-outline'
-                value={`${training.duration} mins`}
-              />
-              <DetailItem icon='map-marker-outline' value={training.location} />
-              <DetailItem
-                icon='information-outline'
-                value={training.trainingType?.name}
-              />
-            </View>
-
-            {training.isActive && currentUser?.role === 'Player' && (
-              <View className='bg-white/10 p-4 rounded-xl'>
-                <View className='flex-row items-center justify-between mb-3'>
-                  <Text className='text-white text-base'>Mark Attendance</Text>
-                  <Switch
-                    value={attendance}
-                    onValueChange={handleAttendance}
-                    trackColor={{ true: '#34D399', false: '#D1D5DB' }}
-                  />
-                </View>
-                <CustomButton
-                  title='Submit Attendance'
-                  handlePress={handleAttendance}
-                  containerStyles='w-full'
-                  variant='primary'
-                />
+      {/* Main Card */}
+      <LinearGradient
+        colors={['#4F46E5', '#7952B3']}
+        className='rounded-2xl shadow-lg mb-6'
+      >
+        <View className='p-6'>
+          <View className='flex-row justify-between items-start mb-4'>
+            <Text className='text-2xl font-bold text-white'>
+              {training.name}
+            </Text>
+            {training.isActive && (
+              <View className='bg-green-500 px-3 py-1 rounded-full'>
+                <Text className='text-white text-xs'>Active</Text>
               </View>
             )}
           </View>
-        </LinearGradient>
 
-        {/* Info Cards */}
-        <View className={`gap-4 ${isSmallScreen ? 'flex-col' : 'flex-row'}`}>
-          {['typeDescription', 'notes', 'equipment'].map(
-            (item) =>
-              training[item] && (
-                <InfoCard
-                  key={item}
-                  title={
-                    item === 'typeDescription'
-                      ? 'Description'
-                      : item === 'notes'
-                      ? 'Coach Notes'
-                      : 'Equipment'
-                  }
-                  content={training[item]}
-                  icon={
-                    item === 'typeDescription'
-                      ? 'text-subject'
-                      : item === 'notes'
-                      ? 'note-text-outline'
-                      : 'tshirt-crew-outline'
-                  }
-                />
-              )
-          )}
-        </View>
-
-        {/* Participants List */}
-        {coach && currentUser?.role === 'Coach' && (
-          <View className='mt-8'>
-            <Text className='text-2xl font-bold text-gray-800 mb-4 text-center'>
-              Training Participants
-            </Text>
-            <ParticipantsList
-              participants={players}
-              teamId={coach?.currentTeam}
-              trainingId={trainingId}
+          <View className={`flex-row flex-wrap gap-4 mb-6`}>
+            <DetailItem
+              icon='clock-outline'
+              value={`${training.duration} mins`}
+            />
+            <DetailItem icon='map-marker-outline' value={training.location} />
+            <DetailItem
+              icon='information-outline'
+              value={training.trainingType?.name}
             />
           </View>
+
+          {training.isActive && currentUser?.role === 'Player' && (
+            <View className='bg-white/10 p-4 rounded-xl'>
+              <View className='flex-row items-center justify-between mb-3'>
+                <Text className='text-white text-base'>Mark Attendance</Text>
+                <Switch
+                  value={attendance}
+                  onValueChange={handleAttendance}
+                  trackColor={{ true: '#34D399', false: '#D1D5DB' }}
+                />
+              </View>
+              <CustomButton
+                title='Submit Attendance'
+                handlePress={handleAttendance}
+                containerStyles='w-full'
+                variant='primary'
+              />
+            </View>
+          )}
+        </View>
+      </LinearGradient>
+
+      {/* Info Cards */}
+      <View className={`gap-4 mb-6 ${isSmallScreen ? 'flex-col' : 'flex-row'}`}>
+        {['typeDescription', 'notes', 'equipment'].map(
+          (item) =>
+            training[item] && (
+              <InfoCard
+                key={item}
+                title={
+                  item === 'typeDescription'
+                    ? 'Description'
+                    : item === 'notes'
+                    ? 'Coach Notes'
+                    : 'Equipment'
+                }
+                content={training[item]}
+                icon={
+                  item === 'typeDescription'
+                    ? 'text-subject'
+                    : item === 'notes'
+                    ? 'note-text-outline'
+                    : 'tshirt-crew-outline'
+                }
+              />
+            )
         )}
       </View>
-    </ScrollView>
+
+      {/* Participants Header */}
+      {coach && currentUser?.role === 'Coach' && (
+        <>
+          <Text className='text-2xl font-bold text-gray-800 mb-4 text-center'>
+            Training Participants
+          </Text>
+          <ParticipantsList
+            participants={players}
+            teamId={coach?.currentTeam}
+            trainingId={trainingId}
+          />
+        </>
+      )}
+    </View>
+  );
+
+  // Render empty list to maintain structure but allow scrolling
+  return (
+    <FlatList
+      data={[]}
+      renderItem={null}
+      ListHeaderComponent={renderListHeader}
+      className='flex-1 bg-gray-50'
+      contentContainerStyle={{ flexGrow: 1 }}
+    />
   );
 };
 
