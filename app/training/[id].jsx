@@ -29,9 +29,7 @@ const TrainingDetails = () => {
   const { currentUser } = useSelector((state) => state.user);
   const { data: player } = useFetch(`/api/player/get/${currentUser?._id}`);
   const { data: coach } = useFetch(`/api/coach/get/${currentUser?._id}`);
-  const { data: players } = useFetch(
-    `/api/admin/team-player/${coach?.currentTeam}`
-  );
+  const { data: players } = useFetch(`/api/admin/participants/${trainingId}`);
 
   const fetchTraining = useCallback(async () => {
     try {
