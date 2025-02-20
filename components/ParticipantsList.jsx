@@ -13,6 +13,7 @@ import useFetch from '../hooks/useFetch';
 import AddParticipantModal from './AddParticipantModel';
 import CustomButton from './CustomButton';
 import api from '../lib/api';
+import Toast from 'react-native-toast-message';
 
 const ParticipantsList = ({ participants, teamId, trainingId }) => {
   const [localParticipants, setLocalParticipants] = useState(
@@ -22,43 +23,66 @@ const ParticipantsList = ({ participants, teamId, trainingId }) => {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   const { data: teamPlayers, isLoading: loading } = useFetch(
-    `/api/team/${teamId}/players`
+    `/api/admin/team-player/${teamId}`
   );
 
-  console.log('participants', participants);
-
   useEffect(() => {
-    setLocalParticipants(participants);
-  }, [participants]);
+    const fetchParticipantsData = async () => {
+      try {
+        // Assuming your API returns full participant objects
+        const res = await api.get(`/api/admin/participants/${trainingId}`);
+        if (res.status === 200) {
+          setLocalParticipants(res.data);
+        }
+      } catch (error) {
+        console.error('Error fetching participants:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to fetch participants',
+        });
+      }
+    };
+
+    fetchParticipantsData();
+  }, [trainingId, participants]);
 
   const handleAddParticipant = async (playerId) => {
     try {
-      const res = await api.post(
-        `/api/admin/training/attendance/${trainingId}`,
-        {
-          playerId,
-        }
-      );
+      const res = await api.post(`/api/admin/participants/${trainingId}/add`, {
+        player: playerId,
+      });
 
       if (res.status === 200) {
-        setLocalParticipants([...localParticipants, playerId]);
+        const newPlayer = teamPlayers.find((player) => player._id === playerId);
+        if (newPlayer) {
+          setLocalParticipants((prev) => [...prev, newPlayer]);
+        }
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to add participant');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to add participant',
+      });
     }
   };
 
   const handleRemoveParticipant = async (playerId) => {
     try {
       const res = await api.delete(
-        `/api/training/${trainingId}/participants/${playerId}`
+        `/api/admin/participants/delete/${playerId}`
       );
 
       if (res.status === 200) {
-        setLocalParticipants(localParticipants.filter((id) => id !== playerId));
+        setLocalParticipants((prev) => prev.filter((p) => p._id !== playerId));
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to remove participant');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to remove participant',
+      });
     }
   };
 
@@ -122,7 +146,7 @@ const ParticipantsList = ({ participants, teamId, trainingId }) => {
       <AddParticipantModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        players={participants?.filter(
+        players={teamPlayers?.filter(
           (player) => !localParticipants?.some((p) => p._id === player._id)
         )}
         onSelect={handleAddParticipant}
