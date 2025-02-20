@@ -5,7 +5,6 @@ import {
   FlatList,
   Pressable,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
@@ -20,8 +19,6 @@ const ParticipantsList = ({ participants, teamId, trainingId }) => {
     participants || []
   );
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
-
   const { data: teamPlayers, isLoading: loading } = useFetch(
     `/api/admin/team-player/${teamId}`
   );
@@ -29,7 +26,6 @@ const ParticipantsList = ({ participants, teamId, trainingId }) => {
   useEffect(() => {
     const fetchParticipantsData = async () => {
       try {
-        // Assuming your API returns full participant objects
         const res = await api.get(`/api/admin/participants/${trainingId}`);
         if (res.status === 200) {
           setLocalParticipants(res.data);
@@ -122,7 +118,6 @@ const ParticipantsList = ({ participants, teamId, trainingId }) => {
           title='Add Participant'
           handlePress={() => setModalVisible(true)}
           containerStyles='py-2 px-4'
-          variant='primary'
         />
       </View>
 
