@@ -7,7 +7,7 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import { Redirect, Tabs, useRouter } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { icons, images } from '../../constants';
 import { Feather } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -217,6 +217,31 @@ const TabsLayout = () => {
                 title='Profile'
                 onPress={() => handleMenuOptionPress('/profile')}
               />
+              {/* Role-specific options */}
+              {currentUser?.role === 'Coach' && (
+                <MenuOption
+                  icon='clipboard'
+                  title='Coach Profile'
+                  onPress={() => handleMenuOptionPress('/coach-profile')}
+                />
+              )}
+
+              {currentUser?.role === 'Player' && (
+                <MenuOption
+                  icon='activity'
+                  title='Player Profile'
+                  onPress={() => handleMenuOptionPress('/player-profile')}
+                />
+              )}
+
+              {currentUser?.role === 'Referee' && (
+                <MenuOption
+                  icon='whistle'
+                  title='Referee Profile'
+                  onPress={() => handleMenuOptionPress('/referee-profile')}
+                />
+              )}
+
               <MenuOption
                 icon='settings'
                 title='Settings'
