@@ -146,9 +146,7 @@ const LastMatch = ({ lastMatchId, lastMatchName, router }) => (
     <View className='ml-3'>
       <Text className='text-sm text-gray-500'>Last Match as Referee</Text>
       {lastMatchId ? (
-        <TouchableOpacity
-          onPress={() => router.push(`/results/${lastMatchId}`)}
-        >
+        <TouchableOpacity onPress={() => router.push(`/result/${lastMatchId}`)}>
           <Text className='text-lg font-medium text-blue-600'>
             {lastMatchName}
           </Text>
