@@ -23,7 +23,7 @@ import api from '../../lib/api';
 const RefereeProfile = () => {
   const { currentUser } = useSelector((state) => state.user);
   const [file, setFile] = useState();
-  const { data: countriesData } = useFetch('/api/admin/country');
+  const { data: countries } = useFetch('/api/admin/country');
   const { data: referee, isLoading: loading } = useFetch(
     `/api/referee/get/${currentUser?._id}`
   );
@@ -32,14 +32,14 @@ const RefereeProfile = () => {
 
   // Format countries data for SelectList
   useEffect(() => {
-    if (countriesData) {
-      const formatted = countriesData.map((country) => ({
+    if (countries) {
+      const formatted = countries.map((country) => ({
         key: country.id,
         value: country.name,
       }));
       setFormattedCountries(formatted);
     }
-  }, [countriesData]);
+  }, [countries]);
 
   const {
     control,
@@ -66,8 +66,7 @@ const RefereeProfile = () => {
         name: referee?.name || '',
         surname: referee?.surname || '',
         nationality: referee?.nationality
-          ? countriesData.find((c) => c._id === referee?.nationality)?.name ||
-            ''
+          ? countries.find((c) => c._id === referee?.nationality)?.name || ''
           : '',
         city: referee?.city || '',
         bio: referee?.bio || '',
@@ -96,7 +95,7 @@ const RefereeProfile = () => {
     const formattedDate = new Date(formData.birthDate);
     const data = new FormData();
 
-    const countryId = countriesData.find(
+    const countryId = countries.find(
       (c) => c.name === formData.nationality
     )?._id;
 
