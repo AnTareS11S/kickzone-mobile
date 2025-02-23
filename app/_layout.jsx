@@ -291,6 +291,14 @@ const RootLayout = () => {
                   headerBackTitle: 'Back',
                 }}
               />
+              <Stack.Screen
+                name='player-profile/index'
+                options={{
+                  title: 'Player Profile',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
             </Stack>
 
             <Toast config={toastConfig} />
