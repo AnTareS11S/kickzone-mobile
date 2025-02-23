@@ -138,98 +138,119 @@ const ProfileForm = () => {
 
   if (loading) {
     return (
-      <View className='flex-1 justify-center items-center'>
-        <ActivityIndicator size='large' color='#6B46C1' />
+      <View className='flex-1 justify-center items-center bg-gray-50'>
+        <ActivityIndicator size='large' color='#4F46E5' />
       </View>
     );
   }
 
   return (
-    <ScrollView className='flex-1 bg-white'>
-      <View className='p-4'>
-        <View className='bg-white rounded-xl p-4 shadow'>
-          <View className='items-center mb-6 relative'>
-            <Image
-              source={{
-                uri:
-                  file?.uri ||
-                  user?.imageUrl ||
-                  'https://d3awt09vrts30h.cloudfront.net/blank-profile-picture.webp',
-              }}
-              className='w-24 h-24 rounded-full'
-            />
-            <TouchableOpacity
-              className='absolute bottom-0 right-[35%] bg-blue-600 rounded-full w-10 h-10 justify-center items-center'
-              onPress={pickImage}
-            >
-              <Icon name='camera' size={20} color='#fff' />
-            </TouchableOpacity>
+    <ScrollView className='flex-1 bg-gray-50'>
+      <View className='p-6 max-w-2xl mx-auto w-full'>
+        <View className='bg-white rounded-2xl p-6 shadow-lg'>
+          {/* Profile Picture Section */}
+          <View className='items-center mb-8'>
+            <View className='relative'>
+              <Image
+                source={{
+                  uri:
+                    file?.uri ||
+                    user?.imageUrl ||
+                    'https://d3awt09vrts30h.cloudfront.net/blank-profile-picture.webp',
+                }}
+                className='w-32 h-32 rounded-full border-4 border-white shadow-lg'
+              />
+              <TouchableOpacity
+                className='absolute bottom-0 right-0 bg-indigo-600 rounded-full p-2 shadow-md'
+                onPress={pickImage}
+              >
+                <Icon name='camera' size={20} color='#fff' />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <FormField
-            control={control}
-            name='username'
-            title='Username'
-            placeholder='Enter your username'
-          />
-
-          <View className='mb-4'>
-            <Text className='text-sm text-gray-700 mb-1'>Role</Text>
-            <Controller
+          {/* Form Fields */}
+          <View className='space-y-6'>
+            <FormField
               control={control}
-              name='wantedRole'
-              render={({ field: { onChange, value } }) => (
-                <View>
-                  <SelectList
-                    setSelected={(val) => onChange(val)}
-                    data={ROLES}
-                    save='value'
-                    placeholder='Select a role'
-                    search={false}
-                    boxStyles={{
-                      borderColor: '#e2e8f0',
-                      borderRadius: 6,
-                      height: 48,
-                      paddingLeft: 12,
-                    }}
-                    dropdownStyles={{
-                      borderColor: '#e2e8f0',
-                      borderRadius: 6,
-                    }}
-                    defaultOption={value ? { key: value, value } : null}
-                  />
-                  {errors.wantedRole && (
-                    <Text className='text-red-500 text-xs mt-1'>
-                      {errors.wantedRole.message}
-                    </Text>
-                  )}
-                </View>
-              )}
+              name='username'
+              title='Username'
+              placeholder='Enter your username'
+              containerStyles='mb-0'
+            />
+
+            <FormField
+              control={control}
+              name='email'
+              title='Email Address'
+              placeholder='example@email.com'
+              keyboardType='email-address'
+              containerStyles='mb-0'
+            />
+
+            {/* Role Selection */}
+            <View>
+              <Text className='text-sm font-medium text-gray-700 mb-2'>
+                Select Role
+              </Text>
+              <Controller
+                control={control}
+                name='wantedRole'
+                render={({ field: { onChange, value } }) => (
+                  <View>
+                    <SelectList
+                      setSelected={(val) => onChange(val)}
+                      data={ROLES}
+                      save='value'
+                      placeholder='Select your role'
+                      searchPlaceholder='Search...'
+                      search={false}
+                      boxStyles={{
+                        borderColor: errors.wantedRole ? '#EF4444' : '#E5E7EB',
+                        borderRadius: 8,
+                        height: 48,
+                        paddingLeft: 16,
+                        backgroundColor: '#F9FAFB',
+                      }}
+                      inputStyles={{ color: '#1F2937' }}
+                      dropdownStyles={{
+                        borderColor: '#E5E7EB',
+                        borderRadius: 8,
+                        marginTop: 4,
+                      }}
+                      defaultOption={value ? { key: value, value } : null}
+                    />
+                    {errors.wantedRole && (
+                      <Text className='text-red-500 text-sm mt-1.5'>
+                        {errors.wantedRole.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
+
+            <FormField
+              control={control}
+              name='bio'
+              title='Bio'
+              placeholder='Tell us about yourself...'
+              multiline
+              numberOfLines={4}
+              inputStyles='min-h-32 text-left'
+            />
+
+            {/* Save Button */}
+            <CustomButton
+              title='Save Changes'
+              handlePress={handleSubmit(onSubmit)}
+              containerStyles='w-full mt-4'
+              textStyles='font-medium'
+              sendingIndicator='Saving...'
+              isLoading={isSaving}
+              disabled={isSaving}
             />
           </View>
-
-          <FormField
-            control={control}
-            name='email'
-            title='Email'
-            placeholder='Enter your email'
-          />
-
-          <FormField
-            control={control}
-            name='bio'
-            title='Bio'
-            placeholder='Enter your bio'
-          />
-
-          <CustomButton
-            title='Save'
-            handlePress={handleSubmit(onSubmit)}
-            containerStyles='w-full'
-            sendingIndicator='Saving...'
-            isLoading={isSaving}
-            disabled={isSaving}
-          />
         </View>
       </View>
     </ScrollView>
