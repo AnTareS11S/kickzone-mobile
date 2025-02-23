@@ -21,6 +21,7 @@ const FormField = ({
   keyboardType = 'default',
   autoCapitalize = 'none',
   otherStyles,
+  editable = true,
   rules = {},
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -257,6 +258,7 @@ const FormField = ({
                   secureTextEntry={isPassword && !showPassword}
                   autoCapitalize={autoCapitalize}
                   autoCorrect={false}
+                  editable={editable}
                 />
 
                 {isPassword && (
