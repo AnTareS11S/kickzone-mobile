@@ -283,6 +283,14 @@ const RootLayout = () => {
                   headerBackTitle: 'Back',
                 }}
               />
+              <Stack.Screen
+                name='referee-profile/index'
+                options={{
+                  title: 'Referee Profile',
+                  animation: 'slide_from_right',
+                  headerBackTitle: 'Back',
+                }}
+              />
             </Stack>
 
             <Toast config={toastConfig} />
