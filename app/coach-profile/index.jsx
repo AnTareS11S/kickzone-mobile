@@ -23,7 +23,7 @@ import api from '../../lib/api';
 const CoachProfile = () => {
   const { currentUser } = useSelector((state) => state.user);
   const [file, setFile] = useState();
-  const { data: countriesData } = useFetch('/api/admin/country');
+  const { data: countries } = useFetch('/api/admin/country');
   const { data: coach, isLoading: loading } = useFetch(
     `/api/coach/get/${currentUser?._id}`
   );
@@ -32,14 +32,14 @@ const CoachProfile = () => {
 
   // Format countries data for SelectList
   useEffect(() => {
-    if (countriesData) {
-      const formatted = countriesData.map((country) => ({
+    if (countries) {
+      const formatted = countries.map((country) => ({
         key: country.id,
         value: country.name,
       }));
       setFormattedCountries(formatted);
     }
-  }, [countriesData]);
+  }, [countries]);
 
   const {
     control,
@@ -66,7 +66,7 @@ const CoachProfile = () => {
         name: coach?.name || '',
         surname: coach?.surname || '',
         nationality: coach?.nationality
-          ? countriesData.find((c) => c._id === coach?.nationality)?.name || ''
+          ? countries.find((c) => c._id === coach?.nationality)?.name || ''
           : '',
         city: coach?.city || '',
         bio: coach?.bio || '',
@@ -95,7 +95,7 @@ const CoachProfile = () => {
     const formattedDate = new Date(formData.birthDate);
     const data = new FormData();
 
-    const countryId = countriesData.find(
+    const countryId = countries.find(
       (c) => c.name === formData.nationality
     )?._id;
 
