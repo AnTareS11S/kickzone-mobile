@@ -1,5 +1,5 @@
 import { Controller, useForm } from 'react-hook-form';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ProfileSchema } from '../../lib/validation';
 import useFetch from '../../hooks/useFetch';
 import { useSelector } from 'react-redux';
@@ -48,7 +48,7 @@ const CoachProfile = () => {
     reset,
     setValue,
   } = useForm({
-    resolver: yupResolver(ProfileSchema),
+    resolver: yupResolver(ProfileSchema(coach ? true : false)),
     defaultValues: {
       name: '',
       surname: '',
@@ -65,7 +65,9 @@ const CoachProfile = () => {
       reset({
         name: coach?.name || '',
         surname: coach?.surname || '',
-        nationality: '',
+        nationality: coach?.nationality
+          ? countriesData.find((c) => c._id === coach?.nationality)?.name || ''
+          : '',
         city: coach?.city || '',
         bio: coach?.bio || '',
         birthDate: coach?.birthDate ? new Date(coach.birthDate) : '',
@@ -88,26 +90,14 @@ const CoachProfile = () => {
     }
   };
 
-  const countryName = countriesData?.find((c) => c.id === coach?.nationality);
-
-  useEffect(() => {
-    if (coach?.nationality) {
-      const countryName = countriesData?.find((c) =>
-        c.id?.includes(coach?.nationality)
-      );
-
-      console.log(coach?.nationality);
-      console.log(countryName?.name);
-      if (countryName) {
-        setValue('nationality', coach.nationality);
-      }
-    }
-  }, [coach, countriesData]);
-
   const onSubmit = async (formData) => {
     setIsSaving(true);
     const formattedDate = new Date(formData.birthDate);
     const data = new FormData();
+
+    const countryId = countriesData.find(
+      (c) => c.name === formData.nationality
+    )?._id;
 
     if (file) {
       const fileToUpload = {
@@ -121,7 +111,8 @@ const CoachProfile = () => {
 
     data.append('name', formData.name);
     data.append('surname', formData.surname);
-    data.append('nationality', formData.nationality);
+    data.append('user', currentUser._id);
+    data.append('nationality', countryId || formData.nationality);
     data.append('city', formData.city);
     data.append('bio', formData.bio);
     data.append('birthDate', formattedDate.toISOString());
@@ -160,114 +151,138 @@ const CoachProfile = () => {
 
   if (loading) {
     return (
-      <View className='flex-1 justify-center items-center'>
-        <ActivityIndicator size='large' color='#6B46C1' />
+      <View className='flex-1 justify-center items-center bg-gray-50'>
+        <ActivityIndicator size='large' color='#4F46E5' />
       </View>
     );
   }
 
   return (
-    <ScrollView className='flex-1 bg-white'>
-      <View className='p-4'>
-        <View className='bg-white rounded-xl p-4 shadow'>
-          <View className='items-center mb-6 relative'>
-            <Image
-              source={{
-                uri:
-                  file?.uri ||
-                  coach?.imageUrl ||
-                  'https://d3awt09vrts30h.cloudfront.net/blank-profile-picture.webp',
-              }}
-              className='w-24 h-24 rounded-full'
-            />
-            <TouchableOpacity
-              className='absolute bottom-0 right-[35%] bg-blue-600 rounded-full w-10 h-10 justify-center items-center'
-              onPress={pickImage}
-            >
-              <Icon name='camera' size={20} color='#fff' />
-            </TouchableOpacity>
+    <ScrollView className='flex-1 bg-gray-50'>
+      <View className='p-6 max-w-2xl mx-auto w-full'>
+        <View className='bg-white rounded-2xl p-6 shadow-lg'>
+          {/* Profile Picture Section */}
+          <View className='items-center mb-8'>
+            <View className='relative'>
+              <Image
+                source={{
+                  uri:
+                    file?.uri ||
+                    coach?.imageUrl ||
+                    'https://d3awt09vrts30h.cloudfront.net/blank-profile-picture.webp',
+                }}
+                className='w-32 h-32 rounded-full border-4 border-white shadow-lg'
+              />
+              <TouchableOpacity
+                className='absolute bottom-0 right-0 bg-indigo-600 rounded-full p-2 shadow-md'
+                onPress={pickImage}
+              >
+                <Icon name='camera' size={20} color='#fff' />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <FormField
-            control={control}
-            name='name'
-            title='Name'
-            placeholder='Enter your name'
-          />
+          {/* Form Fields */}
+          <View className='space-y-6'>
+            <View className='flex-row space-x-4'>
+              <View className='flex-1'>
+                <FormField
+                  control={control}
+                  name='name'
+                  title='First Name'
+                  placeholder='John'
+                  containerStyles='mb-0'
+                />
+              </View>
+              <View className='flex-1'>
+                <FormField
+                  control={control}
+                  name='surname'
+                  title='Last Name'
+                  placeholder='Doe'
+                  containerStyles='mb-0'
+                />
+              </View>
+            </View>
 
-          <FormField
-            control={control}
-            name='surname'
-            title='Surname'
-            placeholder='Enter your surname'
-          />
-
-          <FormField
-            control={control}
-            name='bio'
-            title='Bio'
-            placeholder='Enter your bio'
-          />
-
-          <View className='mb-4'>
-            <Text className='text-sm text-gray-700 mb-1'>Nationality</Text>
-            <Controller
+            <FormField
               control={control}
-              name='nationality'
-              render={({ field: { onChange, value } }) => (
-                <View>
-                  <SelectList
-                    setSelected={(val) => onChange(val)}
-                    data={formattedCountries}
-                    save='key'
-                    placeholder='Select Nationality'
-                    search={false}
-                    boxStyles={{
-                      borderColor: '#e2e8f0',
-                      borderRadius: 6,
-                      height: 48,
-                      paddingLeft: 12,
-                    }}
-                    dropdownStyles={{
-                      borderColor: '#e2e8f0',
-                      borderRadius: 6,
-                    }}
-                    defaultOption={value ? { key: value, value: value } : null}
-                  />
-                  {errors.nationality && (
-                    <Text className='text-red-500 text-xs mt-1'>
-                      {errors.nationality.message}
-                    </Text>
-                  )}
-                </View>
-              )}
+              name='bio'
+              title='Bio'
+              placeholder='Tell us about yourself...'
+              multiline
+              numberOfLines={4}
+              inputStyles='h-32 text-left'
+            />
+
+            {/* Nationality Select */}
+            <View>
+              <Text className='text-sm font-medium text-gray-700 mb-2'>
+                Nationality
+              </Text>
+              <Controller
+                control={control}
+                name='nationality'
+                render={({ field: { onChange, value } }) => (
+                  <View>
+                    <SelectList
+                      setSelected={(val) => onChange(val)}
+                      data={formattedCountries}
+                      save='value'
+                      placeholder='Select Nationality'
+                      searchPlaceholder='Search...'
+                      search={false}
+                      boxStyles={{
+                        borderColor: errors.nationality ? '#EF4444' : '#E5E7EB',
+                        borderRadius: 8,
+                        height: 48,
+                        paddingLeft: 16,
+                        backgroundColor: '#F9FAFB',
+                      }}
+                      inputStyles={{ color: '#1F2937' }}
+                      dropdownStyles={{
+                        borderColor: '#E5E7EB',
+                        borderRadius: 8,
+                        marginTop: 4,
+                      }}
+                      defaultOption={value ? { key: value, value } : null}
+                    />
+                    {errors.nationality && (
+                      <Text className='text-red-500 text-sm mt-1.5'>
+                        {errors.nationality.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
+
+            <FormField
+              control={control}
+              name='city'
+              title='City'
+              placeholder='New York'
+            />
+
+            <FormField
+              control={control}
+              name='birthDate'
+              title='Date of Birth'
+              placeholder='Select date'
+              isDate={true}
+            />
+
+            {/* Save Button */}
+            <CustomButton
+              title='Save Changes'
+              handlePress={handleSubmit(onSubmit)}
+              containerStyles='w-full mt-4'
+              textStyles='font-medium'
+              sendingIndicator='Saving...'
+              isLoading={isSaving}
+              disabled={isSaving}
             />
           </View>
-
-          <FormField
-            control={control}
-            name='city'
-            title='City'
-            placeholder='Enter your city'
-          />
-
-          <FormField
-            control={control}
-            name='birthDate'
-            title='Birth Date'
-            placeholder='Select date'
-            isDate={true}
-            rules={{ required: 'Birth date is required' }}
-          />
-
-          <CustomButton
-            title='Save'
-            handlePress={handleSubmit(onSubmit)}
-            containerStyles='w-full'
-            sendingIndicator='Saving...'
-            isLoading={isSaving}
-            disabled={isSaving}
-          />
         </View>
       </View>
     </ScrollView>
