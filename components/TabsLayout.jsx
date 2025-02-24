@@ -304,7 +304,7 @@ const TabsLayout = ({ children }) => {
 
               {currentUser?.role === 'Referee' && (
                 <MenuOption
-                  icon='whistle'
+                  icon='user-check'
                   title='Referee Profile'
                   onPress={() => handleMenuOptionPress('/referee-profile')}
                 />
