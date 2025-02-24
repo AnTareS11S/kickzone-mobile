@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
   useWindowDimensions,
+  RefreshControl,
 } from 'react-native';
 import { Card } from '@rneui/themed';
 import * as FileSystem from 'expo-file-system';
@@ -14,9 +15,13 @@ import * as Sharing from 'expo-sharing';
 import useFetch from '../hooks/useFetch';
 import api from '../lib/api';
 import { useRouter } from 'expo-router';
+import { useRefresh } from '../app/_layout';
 
 const TableComponent = ({ leagueId }) => {
-  const { data: teamStats } = useFetch(`/api/league/teams-stats/${leagueId}`);
+  const { refreshKey, triggerGlobalRefresh } = useRefresh();
+  const { data: teamStats } = useFetch(`/api/league/teams-stats/${leagueId}`, [
+    refreshKey,
+  ]);
   const router = useRouter();
   const { height: screenHeight } = useWindowDimensions();
 
@@ -106,6 +111,13 @@ const TableComponent = ({ leagueId }) => {
             <ScrollView
               style={{ height: screenHeight * 0.7 }}
               showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={false}
+                  onRefresh={triggerGlobalRefresh}
+                  colors={['#6B46C1']}
+                />
+              }
             >
               {teamStats.map((team, index) => renderTeamRow(team, index))}
             </ScrollView>
