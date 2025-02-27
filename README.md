@@ -4,7 +4,7 @@ Here’s a README for your KickZone Mobile app:
 
 # KickZone Mobile  
 
-A mobile application for managing sports activities, including team management, player profiles, match scheduling, and more. This app is built as the mobile version of the [KickZone API](https://github.com/AnTareS11S/kickzone).  
+A mobile application for managing sports activities, including team management, player profiles, match scheduling, and more. This app is built as the mobile version of the [KickZone](https://github.com/AnTareS11S/kickzone).  
 
 ## Features  
 
